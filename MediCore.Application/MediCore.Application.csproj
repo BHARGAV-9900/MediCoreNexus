@@ -1,0 +1,41 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Folder Include="Common\" />
+    <Folder Include="Features\Authentication\" />
+    <Folder Include="Features\Departments\DTOs\" />
+    <Folder Include="Features\Departments\MappingProfiles\" />
+    <Folder Include="Features\Departments\Validators\" />
+    <Folder Include="Features\Appointments\" />
+    <Folder Include="Features\Laboratory\" />
+    <Folder Include="Features\Billing\" />
+    <Folder Include="Features\Dashboard\" />
+    <Folder Include="Features\Inventory\" />
+    <Folder Include="Features\Notification\" />
+    <Folder Include="Features\Pharmacy\" />
+    <Folder Include="Features\Patients\" />
+    <Folder Include="DTOs\" />
+    <Folder Include="Mappings\" />
+    <Folder Include="Contracts\" />
+    <Folder Include="Validators\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="13.0.1" />
+    <PackageReference Include="FluentValidation" Version="11.11.0" />
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.11.0" />
+    <PackageReference Include="MediatR" Version="12.4.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MediCore.Domain\MediCore.Domain.csproj" />
+    <ProjectReference Include="..\MediCore.Shared\MediCore.Shared.csproj" />
+  </ItemGroup>
+
+</Project>
