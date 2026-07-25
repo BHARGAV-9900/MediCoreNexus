@@ -9,9 +9,15 @@ public class DeleteDepartmentCommandHandler
 {
     private readonly IDepartmentRepository _repository;
 
+    public DeleteDepartmentCommandHandler(
+        IDepartmentRepository repository)
+    {
+        _repository = repository;
+    }
+
     public async Task Handle(
-    DeleteDepartmentCommand request,
-    CancellationToken cancellationToken)
+        DeleteDepartmentCommand request,
+        CancellationToken cancellationToken)
     {
         var department = await _repository.GetByIdAsync(
             request.Id,

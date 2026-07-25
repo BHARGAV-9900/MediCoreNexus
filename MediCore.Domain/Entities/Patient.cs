@@ -65,6 +65,41 @@ public class Patient : BaseAuditableEntity
 
     // Navigation Property (Add later after Appointment entity is created)
     public ICollection<Appointment> Appointments { get; private set; } = new List<Appointment>();
+
+    public void Update(
+        string firstName,
+        string lastName,
+        DateTime dateOfBirth,
+        Gender gender,
+        BloodGroup bloodGroup,
+        string phoneNumber,
+        string email,
+        string address,
+        string emergencyContactName,
+        string emergencyContactPhone,
+        string? insuranceNumber)
+    {
+        SetFirstName(firstName);
+        SetLastName(lastName);
+        SetDateOfBirth(dateOfBirth);
+        SetPhoneNumber(phoneNumber);
+        SetEmail(email);
+
+        Gender = gender;
+        BloodGroup = bloodGroup;
+        Address = address;
+        EmergencyContactName = emergencyContactName;
+        EmergencyContactPhone = emergencyContactPhone;
+        InsuranceNumber = insuranceNumber;
+
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    public void Delete()
+    {
+        IsDeleted = true;
+        DeletedAt = DateTime.UtcNow;
+    }
     public void ChangePhoneNumber(string phoneNumber)
     {
         SetPhoneNumber(phoneNumber);
