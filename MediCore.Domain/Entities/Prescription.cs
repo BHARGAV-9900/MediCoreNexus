@@ -32,17 +32,7 @@ public class Prescription : BaseAuditableEntity
     public ICollection<PrescriptionItem> PrescriptionItems { get; private set; }
         = new List<PrescriptionItem>();
 
-    public void UpdateInstructions(string instructions)
-    {
-        SetInstructions(instructions);
-    }
-
-    public void UpdateNotes(string? notes)
-    {
-        Notes = notes;
-    }
-
-    private void SetAppointment(int appointmentId)
+        private void SetAppointment(int appointmentId)
     {
         if (appointmentId <= 0)
             throw new ArgumentException("Invalid appointment.");
@@ -56,5 +46,23 @@ public class Prescription : BaseAuditableEntity
             throw new ArgumentException("Instructions are required.");
 
         Instructions = instructions.Trim();
+    }
+
+    public void Update(
+        string instructions,
+        string? notes)
+    {
+        SetInstructions(instructions);
+
+        Notes = notes;
+
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    public void Delete()
+    {
+        IsDeleted = true;
+        DeletedAt = DateTime.UtcNow;
+        UpdatedAt = DateTime.UtcNow;
     }
 }

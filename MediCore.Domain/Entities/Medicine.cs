@@ -14,9 +14,9 @@ public class Medicine : BaseAuditableEntity
         decimal unitPrice)
     {
         SetName(name);
+        SetUnitPrice(unitPrice);
 
         Manufacturer = manufacturer;
-        UnitPrice = unitPrice;
         IsActive = true;
     }
 
@@ -38,5 +38,41 @@ public class Medicine : BaseAuditableEntity
             throw new ArgumentException("Medicine name is required.");
 
         Name = name.Trim();
+    }
+    private void SetUnitPrice(decimal unitPrice)
+    {
+        if (unitPrice <= 0)
+            throw new ArgumentException("Unit price must be greater than zero.");
+
+        UnitPrice = unitPrice;
+    }
+    public void Update(
+        string name,
+        string manufacturer,
+        decimal unitPrice)
+    {
+        SetName(name);
+        SetUnitPrice(unitPrice);
+
+        Manufacturer = manufacturer;
+
+        UpdatedAt = DateTime.UtcNow;
+    }
+    public void Activate()
+    {
+        IsActive = true;
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    public void Deactivate()
+    {
+        IsActive = false;
+        UpdatedAt = DateTime.UtcNow;
+    }
+    public void Delete()
+    {
+        IsDeleted = true;
+        DeletedAt = DateTime.UtcNow;
+        UpdatedAt = DateTime.UtcNow;
     }
 }
