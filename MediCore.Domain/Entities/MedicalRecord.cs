@@ -65,4 +65,28 @@ public class MedicalRecord : BaseAuditableEntity
 
         Diagnosis = diagnosis.Trim();
     }
+
+    public void Update(
+        string diagnosis,
+        string symptoms,
+        string clinicalNotes,
+        string treatmentPlan,
+        string? followUpInstructions)
+    {
+        SetDiagnosis(diagnosis);
+
+        Symptoms = symptoms;
+        ClinicalNotes = clinicalNotes;
+        TreatmentPlan = treatmentPlan;
+        FollowUpInstructions = followUpInstructions;
+
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    public void Delete()
+    {
+        IsDeleted = true;
+        DeletedAt = DateTime.UtcNow;
+        UpdatedAt = DateTime.UtcNow;
+    }
 }
