@@ -12,7 +12,6 @@
     <Folder Include="Features\Departments\DTOs\" />
     <Folder Include="Features\Departments\MappingProfiles\" />
     <Folder Include="Features\Departments\Validators\" />
-    <Folder Include="Features\Appointments\" />
     <Folder Include="Features\Laboratory\" />
     <Folder Include="Features\Billing\" />
     <Folder Include="Features\Dashboard\" />

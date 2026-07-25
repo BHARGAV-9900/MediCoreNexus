@@ -62,6 +62,7 @@ public class Appointment : BaseAuditableEntity
             throw new ArgumentException("Cancelled appointments cannot be completed.");
 
         Status = AppointmentStatus.Completed;
+        UpdatedAt = DateTime.UtcNow;
     }
 
     public void Cancel()
@@ -70,6 +71,7 @@ public class Appointment : BaseAuditableEntity
             throw new ArgumentException("Completed appointments cannot be cancelled.");
 
         Status = AppointmentStatus.Cancelled;
+        UpdatedAt = DateTime.UtcNow;
     }
 
     public void CheckIn()
@@ -78,6 +80,7 @@ public class Appointment : BaseAuditableEntity
             throw new ArgumentException("Only scheduled appointments can be checked in.");
 
         Status = AppointmentStatus.CheckedIn;
+        UpdatedAt = DateTime.UtcNow;
     }
 
     public void StartConsultation()
@@ -86,11 +89,13 @@ public class Appointment : BaseAuditableEntity
             throw new ArgumentException("Patient must check in first.");
 
         Status = AppointmentStatus.InProgress;
+        UpdatedAt = DateTime.UtcNow;
     }
 
     public void UpdateNotes(string? notes)
     {
         Notes = notes;
+        UpdatedAt = DateTime.UtcNow;
     }
 
     //Validation Methods
@@ -124,5 +129,25 @@ public class Appointment : BaseAuditableEntity
             throw new ArgumentException("Reason is required.");
 
         Reason = reason.Trim();
+    }
+
+    public void Update(
+        DateTime appointmentDate,
+        string reason,
+        string? notes)
+    {
+        SetAppointmentDate(appointmentDate);
+        SetReason(reason);
+
+        Notes = notes;
+
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    public void Delete()
+    {
+        IsDeleted = true;
+        DeletedAt = DateTime.UtcNow;
+        UpdatedAt = DateTime.UtcNow;
     }
 }
