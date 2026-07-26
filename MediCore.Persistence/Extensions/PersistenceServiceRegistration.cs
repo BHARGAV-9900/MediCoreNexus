@@ -25,6 +25,9 @@ public static class PersistenceServiceRegistration
         services.AddScoped<IAppointmentRepository, AppointmentRepository>();
         services.AddScoped<IMedicalRecordRepository, MedicalRecordRepository>();
         services.AddScoped<IMedicineRepository, MedicineRepository>();
+        services.AddScoped<ILaboratoryTestRepository, LaboratoryTestRepository>();
+        services.AddScoped<ILaboratoryOrderRepository, LaboratoryOrderRepository>();
+        services.AddScoped<ILaboratoryResultRepository, LaboratoryResultRepository>();
         services.AddScoped<IPrescriptionRepository, PrescriptionRepository>();
         services.AddScoped<IPrescriptionItemRepository, PrescriptionItemRepository>();
         services.AddScoped<IBillRepository, BillRepository>();

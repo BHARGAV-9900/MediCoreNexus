@@ -14,9 +14,9 @@ public class LaboratoryTest : BaseAuditableEntity
         string? description = null)
     {
         SetName(name);
+        SetPrice(price);
+        SetDescription(description);
 
-        Price = price;
-        Description = description;
         IsActive = true;
     }
 
@@ -37,5 +37,46 @@ public class LaboratoryTest : BaseAuditableEntity
             throw new ArgumentException("Test name is required.");
 
         Name = name.Trim();
+    }
+    private void SetPrice(decimal price)
+    {
+        if (price <= 0)
+            throw new ArgumentException("Price must be greater than zero.");
+
+        Price = price;
+    }
+    private void SetDescription(string? description)
+    {
+        Description = string.IsNullOrWhiteSpace(description)
+            ? null
+            : description.Trim();
+    }
+    public void Activate()
+    {
+        IsActive = true;
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    public void Deactivate()
+    {
+        IsActive = false;
+        UpdatedAt = DateTime.UtcNow;
+    }
+    public void Update(
+        string name,
+        decimal price,
+        string? description)
+    {
+        SetName(name);
+        SetPrice(price);
+        SetDescription(description);
+
+        UpdatedAt = DateTime.UtcNow;
+    }
+    public void Delete()
+    {
+        IsDeleted = true;
+        DeletedAt = DateTime.UtcNow;
+        UpdatedAt = DateTime.UtcNow;
     }
 }

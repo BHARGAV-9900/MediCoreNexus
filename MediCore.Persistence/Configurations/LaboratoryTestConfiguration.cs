@@ -14,6 +14,10 @@ public class LaboratoryTestConfiguration : IEntityTypeConfiguration<LaboratoryTe
         // Primary Key
         builder.HasKey(t => t.Id);
 
+        // Unique Index on Name
+        builder.HasIndex(t => t.Name)
+       .IsUnique();
+
         // PublicId
         builder.Property(t => t.PublicId)
                .IsRequired();

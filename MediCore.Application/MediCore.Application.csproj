@@ -12,11 +12,9 @@
     <Folder Include="Features\Departments\DTOs\" />
     <Folder Include="Features\Departments\MappingProfiles\" />
     <Folder Include="Features\Departments\Validators\" />
-    <Folder Include="Features\Laboratory\" />
     <Folder Include="Features\Dashboard\" />
     <Folder Include="Features\Inventory\" />
     <Folder Include="Features\Notification\" />
-    <Folder Include="Features\Pharmacy\" />
     <Folder Include="DTOs\" />
     <Folder Include="Mappings\" />
     <Folder Include="Contracts\" />
