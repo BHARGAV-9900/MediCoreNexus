@@ -31,7 +31,11 @@ public class Bill : BaseAuditableEntity
 
     public void MarkAsPaid()
     {
+        if (IsPaid)
+            return;
+
         IsPaid = true;
+        UpdatedAt = DateTime.UtcNow;
     }
 
     private void SetAppointment(int appointmentId)
@@ -48,5 +52,17 @@ public class Bill : BaseAuditableEntity
             throw new ArgumentException("Total amount must be greater than zero.");
 
         TotalAmount = totalAmount;
+    }
+    public void Update(decimal totalAmount)
+    {
+        SetTotalAmount(totalAmount);
+
+        UpdatedAt = DateTime.UtcNow;
+    }
+    public void Delete()
+    {
+        IsDeleted = true;
+        DeletedAt = DateTime.UtcNow;
+        UpdatedAt = DateTime.UtcNow;
     }
 }

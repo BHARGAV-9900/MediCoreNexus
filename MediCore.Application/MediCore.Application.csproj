@@ -13,7 +13,6 @@
     <Folder Include="Features\Departments\MappingProfiles\" />
     <Folder Include="Features\Departments\Validators\" />
     <Folder Include="Features\Laboratory\" />
-    <Folder Include="Features\Billing\" />
     <Folder Include="Features\Dashboard\" />
     <Folder Include="Features\Inventory\" />
     <Folder Include="Features\Notification\" />
