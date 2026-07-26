@@ -19,10 +19,10 @@ public class PrescriptionItem : BaseAuditableEntity
         SetPrescription(prescriptionId);
         SetMedicine(medicineId);
 
-        Dosage = dosage;
-        Frequency = frequency;
-        DurationInDays = durationInDays;
-        Quantity = quantity;
+        SetDosage(dosage);
+        SetFrequency(frequency);
+        SetDuration(durationInDays);
+        SetQuantity(quantity);
     }
 
     public int PrescriptionId { get; private set; }
@@ -56,5 +56,52 @@ public class PrescriptionItem : BaseAuditableEntity
             throw new ArgumentException("Invalid medicine.");
 
         MedicineId = medicineId;
+    }
+    private void SetDosage(string dosage)
+    {
+        if (string.IsNullOrWhiteSpace(dosage))
+            throw new ArgumentException("Dosage is required.");
+
+        Dosage = dosage.Trim();
+    }
+    private void SetFrequency(string frequency)
+    {
+        if (string.IsNullOrWhiteSpace(frequency))
+            throw new ArgumentException("Frequency is required.");
+
+        Frequency = frequency.Trim();
+    }
+    private void SetDuration(int durationInDays)
+    {
+        if (durationInDays <= 0)
+            throw new ArgumentException("Duration must be greater than zero.");
+
+        DurationInDays = durationInDays;
+    }
+    private void SetQuantity(int quantity)
+    {
+        if (quantity <= 0)
+            throw new ArgumentException("Quantity must be greater than zero.");
+
+        Quantity = quantity;
+    }
+    public void Update(
+        string dosage,
+        string frequency,
+        int durationInDays,
+        int quantity)
+    {
+        SetDosage(dosage);
+        SetFrequency(frequency);
+        SetDuration(durationInDays);
+        SetQuantity(quantity);
+
+        UpdatedAt = DateTime.UtcNow;
+    }
+    public void Delete()
+    {
+        IsDeleted = true;
+        DeletedAt = DateTime.UtcNow;
+        UpdatedAt = DateTime.UtcNow;
     }
 }

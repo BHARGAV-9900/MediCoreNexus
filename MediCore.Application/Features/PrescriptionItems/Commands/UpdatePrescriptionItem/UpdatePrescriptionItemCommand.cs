@@ -1,0 +1,16 @@
+﻿using MediatR;
+
+namespace MediCore.Application.Features.PrescriptionItems.Commands.UpdatePrescriptionItem;
+
+public class UpdatePrescriptionItemCommand : IRequest<bool>
+{
+    public int Id { get; set; }
+
+    public string Dosage { get; set; } = string.Empty;
+
+    public string Frequency { get; set; } = string.Empty;
+
+    public int DurationInDays { get; set; }
+
+    public int Quantity { get; set; }
+}
