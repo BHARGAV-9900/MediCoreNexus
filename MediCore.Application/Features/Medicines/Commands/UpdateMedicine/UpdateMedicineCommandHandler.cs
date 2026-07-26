@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using MediCore.Application.Exceptions;
 using MediCore.Application.Interfaces.Repositories;
 
 namespace MediCore.Application.Features.Medicines.Commands.UpdateMedicine;
@@ -23,7 +24,7 @@ public class UpdateMedicineCommandHandler
             cancellationToken);
 
         if (medicine is null)
-            throw new ArgumentException(
+            throw new NotFoundException(
                 $"Medicine with Id {request.Id} was not found.");
 
         medicine.Update(

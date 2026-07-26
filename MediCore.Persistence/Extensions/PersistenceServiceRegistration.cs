@@ -25,6 +25,7 @@ public static class PersistenceServiceRegistration
         services.AddScoped<IAppointmentRepository, AppointmentRepository>();
         services.AddScoped<IMedicalRecordRepository, MedicalRecordRepository>();
         services.AddScoped<IMedicineRepository, MedicineRepository>();
+        services.AddScoped<IPrescriptionRepository, PrescriptionRepository>();
 
         return services;
     }

@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using MediCore.Application.Exceptions;
 using MediCore.Application.Interfaces.Repositories;
 using MediCore.Domain.Entities;
 
@@ -28,7 +29,7 @@ public class CreateMedicalRecordCommandHandler
             cancellationToken);
 
         if (appointment is null)
-            throw new ArgumentException(
+            throw new NotFoundException(
                 $"Appointment with Id {request.AppointmentId} was not found.");
 
         // Ensure only one medical record per appointment
@@ -37,7 +38,7 @@ public class CreateMedicalRecordCommandHandler
             cancellationToken);
 
         if (exists)
-            throw new ArgumentException(
+            throw new ConflictException(
                 "A medical record already exists for this appointment.");
 
         var medicalRecord = new MedicalRecord(

@@ -15,8 +15,8 @@ public class Prescription : BaseAuditableEntity
     {
         SetAppointment(appointmentId);
         SetInstructions(instructions);
-
-        Notes = notes;
+        SetNotes(notes);
+        
     }
 
     public int AppointmentId { get; private set; }
@@ -47,7 +47,12 @@ public class Prescription : BaseAuditableEntity
 
         Instructions = instructions.Trim();
     }
-
+    private void SetNotes(string? notes)
+    {
+        Notes = string.IsNullOrWhiteSpace(notes)
+            ? null
+            : notes.Trim();
+    }
     public void Update(
         string instructions,
         string? notes)

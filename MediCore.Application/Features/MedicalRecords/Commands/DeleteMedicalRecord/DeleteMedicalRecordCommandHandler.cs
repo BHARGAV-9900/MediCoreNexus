@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using MediCore.Application.Exceptions;
 using MediCore.Application.Interfaces.Repositories;
 
 namespace MediCore.Application.Features.MedicalRecords.Commands.DeleteMedicalRecord;
@@ -23,7 +24,7 @@ public class DeleteMedicalRecordCommandHandler
             cancellationToken);
 
         if (record is null)
-            throw new ArgumentException(
+            throw new NotFoundException(
                 $"Medical Record with Id {request.Id} was not found.");
 
         record.Delete();

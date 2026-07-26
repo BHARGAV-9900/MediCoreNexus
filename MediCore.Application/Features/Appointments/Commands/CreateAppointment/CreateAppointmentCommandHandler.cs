@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using MediCore.Application.Exceptions;
 using MediCore.Application.Interfaces.Repositories;
 using MediCore.Domain.Entities;
 
@@ -31,7 +32,7 @@ public class CreateAppointmentCommandHandler
             cancellationToken);
 
         if (patient is null)
-            throw new ArgumentException(
+            throw new NotFoundException(
                 $"Patient with Id {request.PatientId} was not found.");
 
         // Verify Doctor exists
@@ -40,7 +41,7 @@ public class CreateAppointmentCommandHandler
             cancellationToken);
 
         if (doctor is null)
-            throw new ArgumentException(
+            throw new NotFoundException(
                 $"Doctor with Id {request.DoctorId} was not found.");
 
         // Prevent duplicate appointment
@@ -51,7 +52,7 @@ public class CreateAppointmentCommandHandler
             cancellationToken);
 
         if (exists)
-            throw new ArgumentException(
+            throw new ConflictException(
                 "An appointment already exists for the selected patient, doctor and time.");
 
         // Check doctor's availability
@@ -62,7 +63,7 @@ public class CreateAppointmentCommandHandler
             cancellationToken);
 
         if (!doctorAvailable)
-            throw new ArgumentException(
+            throw new ConflictException(
                 "The selected doctor is not available at the requested time.");
 
         // Check patient's availability
@@ -73,7 +74,7 @@ public class CreateAppointmentCommandHandler
             cancellationToken);
 
         if (!patientAvailable)
-            throw new ArgumentException(
+            throw new ConflictException(
                 "The patient already has an appointment at the requested time.");
 
         // Create Appointment using Domain Constructor

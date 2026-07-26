@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using MediCore.Application.Exceptions;
 using MediCore.Application.Interfaces.Repositories;
 
 namespace MediCore.Application.Features.Appointments.Commands.UpdateAppointment;
@@ -23,7 +24,7 @@ public class UpdateAppointmentCommandHandler
             cancellationToken);
 
         if (appointment is null)
-            throw new ArgumentException(
+            throw new NotFoundException(
                 $"Appointment with Id {request.Id} was not found.");
 
         // Check availability only if the appointment time changes
@@ -37,7 +38,7 @@ public class UpdateAppointmentCommandHandler
                     cancellationToken);
 
             if (!doctorAvailable)
-                throw new ArgumentException(
+                throw new ConflictException(
                     "The selected doctor is not available at the requested time.");
 
             var patientAvailable =
@@ -48,7 +49,7 @@ public class UpdateAppointmentCommandHandler
                     cancellationToken);
 
             if (!patientAvailable)
-                throw new ArgumentException(
+                throw new ConflictException(
                     "The patient already has an appointment at the requested time.");
         }
 

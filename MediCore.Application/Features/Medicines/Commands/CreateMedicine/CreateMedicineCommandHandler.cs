@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using MediCore.Application.Exceptions;
 using MediCore.Application.Interfaces.Repositories;
 using MediCore.Domain.Entities;
 
@@ -24,7 +25,7 @@ public class CreateMedicineCommandHandler
             cancellationToken);
 
         if (exists)
-            throw new ArgumentException(
+            throw new ConflictException(
                 $"Medicine '{request.Name}' already exists.");
 
         var medicine = new Medicine(

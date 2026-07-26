@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using MediCore.Application.Exceptions;
 using MediCore.Application.Interfaces.Repositories;
 
 namespace MediCore.Application.Features.Appointments.Queries.GetAppointmentById;
@@ -23,7 +24,7 @@ public class GetAppointmentByIdQueryHandler
             cancellationToken);
 
         if (appointment is null)
-            throw new ArgumentException(
+            throw new NotFoundException(
                 $"Appointment with Id {request.Id} was not found.");
 
         return new AppointmentDto
