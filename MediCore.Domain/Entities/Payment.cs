@@ -46,4 +46,20 @@ public class Payment : BaseAuditableEntity
 
         Amount = amount;
     }
+    public void Update(
+        decimal amount,
+        PaymentMethod paymentMethod)
+    {
+        SetAmount(amount);
+
+        PaymentMethod = paymentMethod;
+
+        UpdatedAt = DateTime.UtcNow;
+    }
+    public void Delete()
+    {
+        IsDeleted = true;
+        DeletedAt = DateTime.UtcNow;
+        UpdatedAt = DateTime.UtcNow;
+    }
 }

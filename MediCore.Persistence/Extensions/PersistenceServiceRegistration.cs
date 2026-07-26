@@ -28,6 +28,7 @@ public static class PersistenceServiceRegistration
         services.AddScoped<IPrescriptionRepository, PrescriptionRepository>();
         services.AddScoped<IPrescriptionItemRepository, PrescriptionItemRepository>();
         services.AddScoped<IBillRepository, BillRepository>();
+        services.AddScoped<IPaymentRepository, PaymentRepository>();
 
         return services;
     }
