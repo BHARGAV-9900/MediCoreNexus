@@ -54,6 +54,17 @@ public class GlobalExceptionMiddleware
             await context.Response.WriteAsync(
                 JsonSerializer.Serialize(response));
         }
+        catch (UnauthorizedException ex)
+        {
+            context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+            context.Response.ContentType = "application/json";
+
+            var response = ApiResponse<object>.FailureResponse(
+                ex.Message);
+
+            await context.Response.WriteAsync(
+                JsonSerializer.Serialize(response));
+        }
         catch (Exception)
         {
             context.Response.StatusCode =
