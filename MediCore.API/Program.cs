@@ -1,7 +1,10 @@
 using MediCore.API.Middleware;
 using MediCore.Application.Extensions;
 using MediCore.Infrastructure.Extensions;
+using MediCore.Persistence.Context;
 using MediCore.Persistence.Extensions;
+using MediCore.Persistence.Seed;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -52,6 +55,15 @@ builder.Services.AddSwaggerGen(options =>
 
 var app = builder.Build();
 
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider
+        .GetRequiredService<ApplicationDbContext>();
+
+    await context.Database.MigrateAsync();
+
+    await RoleSeeder.SeedAsync(context);
+}
 app.UseMiddleware<GlobalExceptionMiddleware>();
 
 // Configure the HTTP request pipeline.

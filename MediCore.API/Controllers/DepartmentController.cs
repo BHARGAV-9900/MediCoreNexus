@@ -6,9 +6,11 @@ using MediCore.Application.Features.Departments.Queries.GetAllDepartments;
 using MediCore.Application.Features.Departments.Queries.GetDepartmentById;
 using MediCore.Shared.Responses;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace MediCore.API.Controllers;
 
+[Authorize(Roles = "Admin")]
 [ApiController]
 [Route("api/[controller]")]
 public class DepartmentController : ControllerBase
