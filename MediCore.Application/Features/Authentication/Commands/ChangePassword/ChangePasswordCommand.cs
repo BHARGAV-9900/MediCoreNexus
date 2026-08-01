@@ -1,12 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using MediatR;
 
-namespace MediCore.Application.Features.Authentication.Commands.ChangePassword
+namespace MediCore.Application.Features.Authentication.Commands.ChangePassword;
+
+public class ChangePasswordCommand : IRequest<bool>
 {
-    internal class ChangePasswordCommand
-    {
-    }
+    public string CurrentPassword { get; set; } = string.Empty;
+
+    public string NewPassword { get; set; } = string.Empty;
+
+    public string ConfirmPassword { get; set; } = string.Empty;
 }

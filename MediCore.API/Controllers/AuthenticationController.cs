@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using MediCore.Application.Features.Authentication.Commands.ChangePassword;
 using MediCore.Application.Features.Authentication.Commands.Login;
 using MediCore.Application.Features.Authentication.Commands.Logout;
 using MediCore.Application.Features.Authentication.Commands.RefreshToken;
@@ -84,5 +85,21 @@ public class AuthenticationController : ControllerBase
             ApiResponse<CurrentUserProfileDto>.SuccessResponse(
                 result,
                 "User profile retrieved successfully."));
+    }
+    [Authorize]
+    [HttpPost("change-password")]
+    [ProducesResponseType(typeof(ApiResponse<bool>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> ChangePassword(
+    ChangePasswordCommand command,
+    CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(
+            command,
+            cancellationToken);
+
+        return Ok(
+            ApiResponse<bool>.SuccessResponse(
+                result,
+                "Password changed successfully."));
     }
 }
