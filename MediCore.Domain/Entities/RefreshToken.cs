@@ -26,7 +26,7 @@ public class RefreshToken : BaseAuditableEntity
 
     public bool IsRevoked { get; private set; }
 
-    public User? User { get; private set; }
+    public User User { get; private set; } = null!;
 
     public void Revoke()
     {

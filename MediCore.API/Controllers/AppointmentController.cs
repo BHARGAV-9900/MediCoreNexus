@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Asp.Versioning;
 using MediCore.Application.Features.Appointments.Commands.CreateAppointment;
 using MediCore.Application.Features.Appointments.Commands.DeleteAppointment;
 using MediCore.Application.Features.Appointments.Commands.UpdateAppointment;
@@ -6,12 +7,15 @@ using MediCore.Application.Features.Appointments.Queries;
 using MediCore.Application.Features.Appointments.Queries.GetAllAppointments;
 using MediCore.Application.Features.Appointments.Queries.GetAppointmentById;
 using MediCore.Shared.Responses;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MediCore.API.Controllers;
 
+[Authorize(Policy = "AppointmentManagement")]
 [ApiController]
-[Route("api/[controller]")]
+[ApiVersion("1.0")]
+[Route("api/v{version:apiVersion}/[controller]")]
 public class AppointmentController : ControllerBase
 {
     private readonly IMediator _mediator;
@@ -81,8 +85,8 @@ public class AppointmentController : ControllerBase
         await _mediator.Send(command, cancellationToken);
 
         return Ok(
-            ApiResponse<object>.SuccessResponse(
-                null,
+            ApiResponse<bool>.SuccessResponse(
+                true,
                 "Appointment updated successfully."));
     }
 
@@ -96,8 +100,8 @@ public class AppointmentController : ControllerBase
             cancellationToken);
 
         return Ok(
-            ApiResponse<object>.SuccessResponse(
-                null,
+            ApiResponse<bool>.SuccessResponse(
+                true,
                 "Appointment deleted successfully."));
     }
 }

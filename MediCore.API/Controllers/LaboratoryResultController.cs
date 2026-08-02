@@ -1,4 +1,5 @@
-﻿using MediatR;
+﻿using Asp.Versioning;
+using MediatR;
 using MediCore.Application.Features.Laboratory.Commands.CreateLaboratoryResult;
 using MediCore.Application.Features.Laboratory.Commands.DeleteLaboratoryResult;
 using MediCore.Application.Features.Laboratory.Commands.UpdateLaboratoryResult;
@@ -11,7 +12,8 @@ using Microsoft.AspNetCore.Mvc;
 namespace MediCore.API.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[ApiVersion("1.0")]
+[Route("api/v{version:apiVersion}/[controller]")]
 public class LaboratoryResultController : ControllerBase
 {
     private readonly IMediator _mediator;

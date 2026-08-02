@@ -7,21 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Common\" />
-    <Folder Include="Features\Authentication\Common\" />
-    <Folder Include="Features\Departments\DTOs\" />
-    <Folder Include="Features\Departments\MappingProfiles\" />
-    <Folder Include="Features\Departments\Validators\" />
-    <Folder Include="Features\Dashboard\" />
-    <Folder Include="Features\Inventory\" />
-    <Folder Include="Features\Notification\" />
-    <Folder Include="DTOs\" />
-    <Folder Include="Mappings\" />
-    <Folder Include="Contracts\" />
-    <Folder Include="Validators\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="AutoMapper" Version="13.0.1" />
     <PackageReference Include="FluentValidation" Version="11.11.0" />
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.11.0" />

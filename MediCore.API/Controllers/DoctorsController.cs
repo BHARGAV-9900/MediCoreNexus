@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Asp.Versioning;
 using MediCore.Application.Features.Doctors.Commands.CreateDoctor;
 using MediCore.Application.Features.Doctors.Commands.DeleteDoctor;
 using MediCore.Application.Features.Doctors.Commands.UpdateDoctor;
@@ -6,12 +7,15 @@ using MediCore.Application.Features.Doctors.DTOs;
 using MediCore.Application.Features.Doctors.Queries.GetAllDoctors;
 using MediCore.Application.Features.Doctors.Queries.GetDoctorById;
 using MediCore.Shared.Responses;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MediCore.API.Controllers;
 
+[Authorize(Policy = "DoctorManagement")]
 [ApiController]
-[Route("api/[controller]")]
+[ApiVersion("1.0")]
+[Route("api/v{version:apiVersion}/[controller]")]
 public class DoctorsController : ControllerBase
 {
     private readonly IMediator _mediator;
@@ -62,8 +66,8 @@ public class DoctorsController : ControllerBase
 
         await _mediator.Send(command);
 
-        return Ok(ApiResponse<object>.SuccessResponse(
-            null,
+        return Ok(ApiResponse<bool>.SuccessResponse(
+            true,
             "Doctor updated successfully."));
     }
     [HttpDelete("{id}")]
@@ -71,8 +75,8 @@ public class DoctorsController : ControllerBase
     {
         await _mediator.Send(new DeleteDoctorCommand(id));
 
-        return Ok(ApiResponse<object>.SuccessResponse(
-            null,
+        return Ok(ApiResponse<bool>.SuccessResponse(
+            true,
             "Doctor deleted successfully."));
     }
 }

@@ -1,4 +1,5 @@
-﻿using MediCore.Domain.Entities;
+﻿using MediCore.Application.Features.Patients.Queries.GetPagedPatients;
+using MediCore.Domain.Entities;
 
 namespace MediCore.Application.Interfaces.Repositories;
 
@@ -13,6 +14,9 @@ public interface IPatientRepository
         CancellationToken cancellationToken);
 
     Task<IEnumerable<Patient>> GetAllAsync(
+        CancellationToken cancellationToken);
+    Task<(IEnumerable<Patient> Patients, int TotalCount)> GetPagedAsync(
+        GetPagedPatientsQuery request,
         CancellationToken cancellationToken);
 
     Task<bool> ExistsByEmailAsync(

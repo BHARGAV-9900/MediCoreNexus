@@ -47,6 +47,8 @@ public class ApplicationDbContext : DbContext
 
     public DbSet<Medicine> Medicines => Set<Medicine>();
 
+    public DbSet<Inventory> Inventories => Set<Inventory>();
+
     public DbSet<LaboratoryTest> LaboratoryTests => Set<LaboratoryTest>();
 
     public DbSet<LaboratoryOrder> LaboratoryOrders => Set<LaboratoryOrder>();
@@ -63,6 +65,7 @@ public class ApplicationDbContext : DbContext
 
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
 
+    public DbSet<Notification> Notifications => Set<Notification>();
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);

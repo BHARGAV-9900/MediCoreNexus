@@ -1,16 +1,22 @@
 ﻿using MediatR;
+using Asp.Versioning;
+using MediCore.Application.Common.Pagination;
 using MediCore.Application.Features.Patients.Commands.CreatePatient;
 using MediCore.Application.Features.Patients.Commands.DeletePatient;
 using MediCore.Application.Features.Patients.Commands.UpdatePatient;
 using MediCore.Application.Features.Patients.Queries.GetAllPatients;
+using MediCore.Application.Features.Patients.Queries.GetPagedPatients;
 using MediCore.Application.Features.Patients.Queries.GetPatientById;
 using MediCore.Shared.Responses;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MediCore.API.Controllers;
 
+[Authorize(Policy = "PatientManagement")]
 [ApiController]
-[Route("api/[controller]")]
+[ApiVersion("1.0")]
+[Route("api/v{version:apiVersion}/[controller]")]
 public class PatientController : ControllerBase
 {
     private readonly IMediator _mediator;
@@ -45,6 +51,22 @@ public class PatientController : ControllerBase
                     "Patients retrieved successfully."));
     }
 
+    [HttpGet("paged")]
+    [ProducesResponseType(
+    typeof(ApiResponse<PagedResult<PatientDto>>),
+    StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetPaged(
+    [FromQuery] GetPagedPatientsQuery query,
+    CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(query, cancellationToken);
+
+        return Ok(
+            ApiResponse<PagedResult<PatientDto>>.SuccessResponse(
+                result,
+                "Patients retrieved successfully."));
+    }
+
     [HttpGet("{id:int}")]
     public async Task<IActionResult> GetById(int id)
     {
@@ -76,8 +98,8 @@ public class PatientController : ControllerBase
         await _mediator.Send(command);
 
         return Ok(
-            ApiResponse<object>.SuccessResponse(
-                null,
+            ApiResponse<bool>.SuccessResponse(
+                true,
                 "Patient updated successfully."));
     }
 
@@ -91,8 +113,8 @@ public class PatientController : ControllerBase
             });
 
         return Ok(
-            ApiResponse<object>.SuccessResponse(
-                null,
+            ApiResponse<bool>.SuccessResponse(
+                true,
                 "Patient deleted successfully."));
     }
 }

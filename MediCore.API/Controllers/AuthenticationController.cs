@@ -1,4 +1,5 @@
-﻿using MediatR;
+﻿using Asp.Versioning;
+using MediatR;
 using MediCore.Application.Features.Authentication.Commands.ChangePassword;
 using MediCore.Application.Features.Authentication.Commands.Login;
 using MediCore.Application.Features.Authentication.Commands.Logout;
@@ -13,7 +14,8 @@ using Microsoft.AspNetCore.Mvc;
 namespace MediCore.API.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[ApiVersion("1.0")]
+[Route("api/v{version:apiVersion}/[controller]")]
 public class AuthenticationController : ControllerBase
 {
     private readonly IMediator _mediator;

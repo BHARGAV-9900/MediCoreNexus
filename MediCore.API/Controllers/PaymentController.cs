@@ -1,4 +1,5 @@
-﻿using MediatR;
+﻿using Asp.Versioning;
+using MediatR;
 using MediCore.Application.Features.Billing.Commands.CreatePayment;
 using MediCore.Application.Features.Billing.Commands.DeletePayment;
 using MediCore.Application.Features.Billing.Commands.UpdatePayment;
@@ -12,7 +13,8 @@ using Microsoft.AspNetCore.Mvc;
 namespace MediCore.API.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[ApiVersion("1.0")]
+[Route("api/v{version:apiVersion}/[controller]")]
 public class PaymentController : ControllerBase
 {
     private readonly IMediator _mediator;

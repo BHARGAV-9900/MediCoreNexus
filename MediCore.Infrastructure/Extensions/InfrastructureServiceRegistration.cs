@@ -65,7 +65,23 @@ public static class InfrastructureServiceRegistration
         };
     });
 
-        services.AddAuthorization();
+        services.AddAuthorization(options =>
+        {
+            options.AddPolicy("AdminOnly", policy =>
+                policy.RequireRole("Admin"));
+
+            options.AddPolicy("PatientManagement", policy =>
+                policy.RequireRole("Admin", "Receptionist"));
+
+            options.AddPolicy("AppointmentManagement", policy =>
+                policy.RequireRole(
+                    "Admin",
+                    "Doctor",
+                    "Receptionist"));
+
+            options.AddPolicy("DoctorManagement", policy =>
+                policy.RequireRole("Admin"));
+        });
 
         return services;
     }

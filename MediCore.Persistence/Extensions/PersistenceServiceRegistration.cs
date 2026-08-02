@@ -35,7 +35,9 @@ public static class PersistenceServiceRegistration
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IRoleRepository, RoleRepository>();
         services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
-
+        services.AddScoped<IDashboardRepository, DashboardRepository>();
+        services.AddScoped<IInventoryRepository, InventoryRepository>();
+        services.AddScoped<INotificationRepository, NotificationRepository>();
 
         return services;
     }

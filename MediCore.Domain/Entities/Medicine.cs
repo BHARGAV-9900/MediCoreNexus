@@ -30,7 +30,9 @@ public class Medicine : BaseAuditableEntity
     
     public ICollection<PrescriptionItem> PrescriptionItems { get; private set; }
         = new List<PrescriptionItem>();
-   
+
+    public ICollection<Inventory> Inventories { get; private set; }
+    = new List<Inventory>();
 
     private void SetName(string name)
     {

@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Asp.Versioning;
 using MediCore.Application.Features.Departments.Commands.CreateDepartment;
 using MediCore.Application.Features.Departments.Commands.DeleteDepartment;
 using MediCore.Application.Features.Departments.Commands.UpdateDepartment;
@@ -10,9 +11,10 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace MediCore.API.Controllers;
 
-[Authorize(Roles = "Admin")]
+[Authorize(Policy = "AdminOnly")]
 [ApiController]
-[Route("api/[controller]")]
+[ApiVersion("1.0")]
+[Route("api/v{version:apiVersion}/[controller]")]
 public class DepartmentController : ControllerBase
 {
     private readonly IMediator _mediator;
@@ -75,8 +77,8 @@ public class DepartmentController : ControllerBase
         await _mediator.Send(command);
 
         return Ok(
-            ApiResponse<object>.SuccessResponse(
-                null,
+            ApiResponse<bool>.SuccessResponse(
+                true,
                 "Department updated successfully."));
     }
     [HttpDelete("{id:int}")]
@@ -86,8 +88,8 @@ public class DepartmentController : ControllerBase
             new DeleteDepartmentCommand(id));
 
         return Ok(
-            ApiResponse<object>.SuccessResponse(
-                null,
+            ApiResponse<bool>.SuccessResponse(
+                true,
                 "Department deleted successfully."));
     }
 }

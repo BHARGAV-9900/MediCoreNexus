@@ -1,20 +1,19 @@
-﻿using MediatR;
-using Microsoft.AspNetCore.Mvc;
-
-using MediCore.Shared.Responses;
-
+﻿using Asp.Versioning;
+using MediatR;
 using MediCore.Application.Features.MedicalRecords.Commands.CreateMedicalRecord;
-using MediCore.Application.Features.MedicalRecords.Commands.UpdateMedicalRecord;
 using MediCore.Application.Features.MedicalRecords.Commands.DeleteMedicalRecord;
-
+using MediCore.Application.Features.MedicalRecords.Commands.UpdateMedicalRecord;
 using MediCore.Application.Features.MedicalRecords.Queries;
 using MediCore.Application.Features.MedicalRecords.Queries.GetAllMedicalRecords;
 using MediCore.Application.Features.MedicalRecords.Queries.GetMedicalRecordById;
+using MediCore.Shared.Responses;
+using Microsoft.AspNetCore.Mvc;
 
 namespace MediCore.API.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[ApiVersion("1.0")]
+[Route("api/v{version:apiVersion}/[controller]")]
 public class MedicalRecordController : ControllerBase
 {
     private readonly IMediator _mediator;

@@ -1,4 +1,5 @@
-﻿using MediatR;
+﻿using Asp.Versioning;
+using MediatR;
 using MediCore.Application.Features.Prescriptions.Commands.CreatePrescription;
 using MediCore.Application.Features.Prescriptions.Commands.DeletePrescription;
 using MediCore.Application.Features.Prescriptions.Commands.UpdatePrescription;
@@ -11,7 +12,8 @@ using Microsoft.AspNetCore.Mvc;
 namespace MediCore.API.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[ApiVersion("1.0")]
+[Route("api/v{version:apiVersion}/[controller]")]
 public class PrescriptionController : ControllerBase
 {
     private readonly IMediator _mediator;
