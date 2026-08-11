@@ -4,7 +4,7 @@ public class NotificationDto
 {
     public int Id { get; set; }
 
-    public Guid UserId { get; set; }
+    public int UserId { get; set; }
 
     public string Title { get; set; } = string.Empty;
 

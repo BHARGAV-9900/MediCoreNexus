@@ -14,6 +14,14 @@ public class NotificationConfiguration
 
         builder.HasKey(x => x.Id);
 
+        builder.Property(x => x.UserId)
+            .IsRequired();
+
+        builder.HasOne<User>()
+            .WithMany()
+            .HasForeignKey(x => x.UserId)
+            .OnDelete(DeleteBehavior.Restrict);
+
         builder.Property(x => x.Title)
             .IsRequired()
             .HasMaxLength(200);
@@ -27,6 +35,10 @@ public class NotificationConfiguration
             .HasMaxLength(50);
 
         builder.Property(x => x.IsRead)
+            .IsRequired()
             .HasDefaultValue(false);
+
+        builder.Property(x => x.ReadAt)
+            .IsRequired(false);
     }
 }

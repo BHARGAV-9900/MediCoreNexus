@@ -47,7 +47,6 @@ public class LaboratoryTestConfiguration : IEntityTypeConfiguration<LaboratoryTe
                .OnDelete(DeleteBehavior.Restrict);
 
         // Indexes
-        builder.HasIndex(t => t.Name);
 
         builder.HasIndex(t => t.PublicId)
                .IsUnique();

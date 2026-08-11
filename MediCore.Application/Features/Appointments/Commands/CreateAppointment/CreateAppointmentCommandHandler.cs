@@ -26,6 +26,13 @@ public class CreateAppointmentCommandHandler
         CreateAppointmentCommand request,
         CancellationToken cancellationToken)
     {
+        // Appointment must be in the future
+        if (request.AppointmentDate <= DateTime.UtcNow)
+        {
+            throw new ConflictException(
+                "Appointment date and time must be in the future.");
+        }
+
         // Verify Patient exists
         var patient = await _patientRepository.GetByIdAsync(
             request.PatientId,
@@ -56,22 +63,24 @@ public class CreateAppointmentCommandHandler
                 "An appointment already exists for the selected patient, doctor and time.");
 
         // Check doctor's availability
-        var doctorAvailable = await _appointmentRepository.IsDoctorAvailableAsync(
-            request.DoctorId,
-            request.AppointmentDate,
-            null,
-            cancellationToken);
+        var doctorAvailable =
+            await _appointmentRepository.IsDoctorAvailableAsync(
+                request.DoctorId,
+                request.AppointmentDate,
+                null,
+                cancellationToken);
 
         if (!doctorAvailable)
             throw new ConflictException(
                 "The selected doctor is not available at the requested time.");
 
         // Check patient's availability
-        var patientAvailable = await _appointmentRepository.IsPatientAvailableAsync(
-            request.PatientId,
-            request.AppointmentDate,
-            null,
-            cancellationToken);
+        var patientAvailable =
+            await _appointmentRepository.IsPatientAvailableAsync(
+                request.PatientId,
+                request.AppointmentDate,
+                null,
+                cancellationToken);
 
         if (!patientAvailable)
             throw new ConflictException(

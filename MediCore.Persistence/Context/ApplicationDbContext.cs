@@ -66,6 +66,8 @@ public class ApplicationDbContext : DbContext
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
 
     public DbSet<Notification> Notifications => Set<Notification>();
+
+    public DbSet<SystemSettings> SystemSettings => Set<SystemSettings>();
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);

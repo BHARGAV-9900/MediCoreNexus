@@ -17,6 +17,7 @@ public interface ILaboratoryTestRepository
 
     Task<bool> ExistsByNameAsync(
         string name,
+        int excludeId,
         CancellationToken cancellationToken);
 
     Task SaveChangesAsync(

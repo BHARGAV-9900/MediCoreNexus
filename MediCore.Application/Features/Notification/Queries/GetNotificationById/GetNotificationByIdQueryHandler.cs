@@ -1,35 +1,54 @@
-﻿using AutoMapper;
-using MediatR;
+﻿using MediatR;
 using MediCore.Application.Exceptions;
 using MediCore.Application.Interfaces.Repositories;
 
 namespace MediCore.Application.Features.Notification.Queries.GetNotificationById;
 
 public class GetNotificationByIdQueryHandler
-    : IRequestHandler<GetNotificationByIdQuery, NotificationDto>
+    : IRequestHandler<
+        GetNotificationByIdQuery,
+        NotificationDto>
 {
     private readonly INotificationRepository _repository;
-    private readonly IMapper _mapper;
 
     public GetNotificationByIdQueryHandler(
-        INotificationRepository repository,
-        IMapper mapper)
+        INotificationRepository repository)
     {
         _repository = repository;
-        _mapper = mapper;
     }
 
     public async Task<NotificationDto> Handle(
         GetNotificationByIdQuery request,
         CancellationToken cancellationToken)
     {
-        var notification = await _repository.GetByIdAsync(
-            request.Id,
-            cancellationToken);
+        var notification =
+            await _repository.GetByIdAsync(
+                request.Id,
+                cancellationToken);
 
         if (notification is null)
-            throw new NotFoundException("Notification not found.");
+        {
+            throw new NotFoundException(
+                "Notification not found.");
+        }
 
-        return _mapper.Map<NotificationDto>(notification);
+        return new NotificationDto
+        {
+            Id = notification.Id,
+
+            UserId = notification.UserId,
+
+            Title = notification.Title,
+
+            Message = notification.Message,
+
+            Type = notification.Type,
+
+            IsRead = notification.IsRead,
+
+            ReadAt = notification.ReadAt,
+
+            CreatedAt = notification.CreatedAt
+        };
     }
 }

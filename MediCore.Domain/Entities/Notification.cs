@@ -9,12 +9,13 @@ public class Notification : BaseAuditableEntity
     }
 
     public Notification(
-        Guid userId,
+        int userId,
         string title,
         string message,
         string type)
     {
         UserId = userId;
+
         SetTitle(title);
         SetMessage(message);
 
@@ -22,7 +23,7 @@ public class Notification : BaseAuditableEntity
         IsRead = false;
     }
 
-    public Guid UserId { get; private set; }
+    public int UserId { get; private set; }
 
     public string Title { get; private set; } = string.Empty;
 

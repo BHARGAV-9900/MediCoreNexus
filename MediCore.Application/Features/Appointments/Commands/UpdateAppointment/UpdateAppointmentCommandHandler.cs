@@ -19,17 +19,26 @@ public class UpdateAppointmentCommandHandler
         UpdateAppointmentCommand request,
         CancellationToken cancellationToken)
     {
-        var appointment = await _appointmentRepository.GetByIdAsync(
-            request.Id,
-            cancellationToken);
+        var appointment =
+            await _appointmentRepository.GetByIdAsync(
+                request.Id,
+                cancellationToken);
 
         if (appointment is null)
             throw new NotFoundException(
                 $"Appointment with Id {request.Id} was not found.");
 
-        // Check availability only if the appointment time changes
+        // Only validate date/time when appointment time changes
         if (appointment.AppointmentDate != request.AppointmentDate)
         {
+            // New appointment time must be in the future
+            if (request.AppointmentDate <= DateTime.UtcNow)
+            {
+                throw new ConflictException(
+                    "Appointment date and time must be in the future.");
+            }
+
+            // Check doctor availability
             var doctorAvailable =
                 await _appointmentRepository.IsDoctorAvailableAsync(
                     appointment.DoctorId,
@@ -41,6 +50,7 @@ public class UpdateAppointmentCommandHandler
                 throw new ConflictException(
                     "The selected doctor is not available at the requested time.");
 
+            // Check patient availability
             var patientAvailable =
                 await _appointmentRepository.IsPatientAvailableAsync(
                     appointment.PatientId,

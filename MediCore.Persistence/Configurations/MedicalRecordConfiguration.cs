@@ -48,7 +48,8 @@ public class MedicalRecordConfiguration : IEntityTypeConfiguration<MedicalRecord
 
         // Unique Index
         builder.HasIndex(m => m.AppointmentId)
-               .IsUnique();
+               .IsUnique()
+               .HasFilter("[IsDeleted] = 0");
 
         builder.HasIndex(m => m.PublicId)
                .IsUnique();

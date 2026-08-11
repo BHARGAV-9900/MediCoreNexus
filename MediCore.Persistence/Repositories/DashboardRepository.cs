@@ -1,7 +1,7 @@
-﻿using MediCore.Application.Features.Dashboard.Queries.GetDashboard;
+﻿using Microsoft.EntityFrameworkCore;
+using MediCore.Application.Features.Dashboard.Queries.GetDashboard;
 using MediCore.Application.Interfaces.Repositories;
 using MediCore.Persistence.Context;
-using Microsoft.EntityFrameworkCore;
 
 namespace MediCore.Persistence.Repositories;
 
@@ -9,62 +9,146 @@ public class DashboardRepository : IDashboardRepository
 {
     private readonly ApplicationDbContext _context;
 
-    public DashboardRepository(ApplicationDbContext context)
+    public DashboardRepository(
+        ApplicationDbContext context)
     {
         _context = context;
     }
 
     public async Task<DashboardDto> GetDashboardAsync(
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken = default)
     {
-        var today = DateTime.Today;
+        var today = DateTime.UtcNow.Date;
+
+        // -----------------------------
+        // PATIENTS
+        // -----------------------------
+
+        var totalPatients = await _context.Patients
+            .CountAsync(cancellationToken);
+
+
+        // -----------------------------
+        // DOCTORS
+        // -----------------------------
+
+        var totalDoctors = await _context.Doctors
+            .CountAsync(cancellationToken);
+
+
+        // -----------------------------
+        // DEPARTMENTS
+        // -----------------------------
+
+        var totalDepartments = await _context.Departments
+            .CountAsync(cancellationToken);
+
+
+        // -----------------------------
+        // APPOINTMENTS
+        // -----------------------------
+
+        var totalAppointments = await _context.Appointments
+            .CountAsync(cancellationToken);
+
+
+        // -----------------------------
+        // TODAY'S APPOINTMENTS
+        // -----------------------------
+
+        var todayAppointments = await _context.Appointments
+            .CountAsync(
+                a => a.AppointmentDate.Date == today,
+                cancellationToken);
+
+
+        // -----------------------------
+        // MEDICINES
+        // -----------------------------
+
+        var totalMedicines = await _context.Medicines
+            .CountAsync(cancellationToken);
+
+
+        // -----------------------------
+        // BILLS
+        // -----------------------------
+
+        var totalBills = await _context.Bills
+            .CountAsync(cancellationToken);
+
+
+        // -----------------------------
+        // PAID BILLS
+        // -----------------------------
+
+        var paidBills = await _context.Payments
+            .Select(p => p.BillId)
+            .Distinct()
+            .CountAsync(cancellationToken);
+
+
+        // -----------------------------
+        // PENDING BILLS
+        // -----------------------------
+
+        var pendingBills = totalBills - paidBills;
+
+
+        // -----------------------------
+        // TOTAL REVENUE
+        // -----------------------------
+
+        var totalRevenue = await _context.Payments
+            .SumAsync(
+                p => (decimal?)p.Amount,
+                cancellationToken)
+            ?? 0;
+
+
+        // -----------------------------
+        // LABORATORY ORDERS
+        // -----------------------------
+
+        var totalLaboratoryOrders = await _context.LaboratoryOrders
+            .CountAsync(cancellationToken);
+
+
+        // -----------------------------
+        // PRESCRIPTIONS
+        // -----------------------------
+
+        var totalPrescriptions = await _context.Prescriptions
+            .CountAsync(cancellationToken);
+
+
+        // -----------------------------
+        // RESULT
+        // -----------------------------
 
         return new DashboardDto
         {
-            TotalPatients = await _context.Patients
-                .CountAsync(x => !x.IsDeleted, cancellationToken),
+            TotalPatients = totalPatients,
 
-            TotalDoctors = await _context.Doctors
-                .CountAsync(x => !x.IsDeleted, cancellationToken),
+            TotalDoctors = totalDoctors,
 
-            TotalDepartments = await _context.Departments
-                .CountAsync(x => !x.IsDeleted, cancellationToken),
+            TotalDepartments = totalDepartments,
 
-            TotalAppointments = await _context.Appointments
-                .CountAsync(x => !x.IsDeleted, cancellationToken),
+            TotalAppointments = totalAppointments,
 
-            TodayAppointments = await _context.Appointments
-                .CountAsync(
-                    x => !x.IsDeleted &&
-                    x.AppointmentDate.Date == today,
-                    cancellationToken),
+            TodayAppointments = todayAppointments,
 
-            TotalMedicines = await _context.Medicines
-                .CountAsync(x => !x.IsDeleted, cancellationToken),
+            TotalMedicines = totalMedicines,
 
-            PendingBills = await _context.Bills
-                .CountAsync(
-                    x => !x.IsDeleted &&
-                    !x.IsPaid,
-                    cancellationToken),
+            PendingBills = pendingBills,
 
-            PaidBills = await _context.Bills
-                .CountAsync(
-                    x => !x.IsDeleted &&
-                    x.IsPaid,
-                    cancellationToken),
+            PaidBills = paidBills,
 
-            TotalRevenue = await _context.Bills
-                .Where(x => !x.IsDeleted && x.IsPaid)
-                .SumAsync(
-                    x => (decimal?)x.TotalAmount,
-                    cancellationToken) ?? 0,
+            TotalRevenue = totalRevenue,
 
-            TotalLaboratoryOrders = await _context.LaboratoryOrders
-                .CountAsync(x => !x.IsDeleted, cancellationToken),
+            TotalLaboratoryOrders = totalLaboratoryOrders,
 
-            TotalPrescriptions = await _context.Prescriptions
-                .CountAsync(x => !x.IsDeleted, cancellationToken)
+            TotalPrescriptions = totalPrescriptions
         };
     }
 }

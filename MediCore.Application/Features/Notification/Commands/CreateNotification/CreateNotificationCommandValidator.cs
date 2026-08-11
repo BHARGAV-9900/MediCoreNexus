@@ -7,9 +7,6 @@ public class CreateNotificationCommandValidator
 {
     public CreateNotificationCommandValidator()
     {
-        RuleFor(x => x.UserId)
-            .NotEmpty();
-
         RuleFor(x => x.Title)
             .NotEmpty()
             .MaximumLength(200);

@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using MediatR;
+﻿using MediatR;
 using MediCore.Application.Interfaces.Repositories;
 
 namespace MediCore.Application.Features.Notification.Queries.GetUnreadNotifications;
@@ -10,14 +9,11 @@ public class GetUnreadNotificationsQueryHandler
         IEnumerable<NotificationDto>>
 {
     private readonly INotificationRepository _repository;
-    private readonly IMapper _mapper;
 
     public GetUnreadNotificationsQueryHandler(
-        INotificationRepository repository,
-        IMapper mapper)
+        INotificationRepository repository)
     {
         _repository = repository;
-        _mapper = mapper;
     }
 
     public async Task<IEnumerable<NotificationDto>> Handle(
@@ -25,8 +21,27 @@ public class GetUnreadNotificationsQueryHandler
         CancellationToken cancellationToken)
     {
         var notifications =
-            await _repository.GetUnreadAsync(cancellationToken);
+            await _repository.GetUnreadAsync(
+                cancellationToken);
 
-        return _mapper.Map<IEnumerable<NotificationDto>>(notifications);
+        return notifications.Select(
+            notification => new NotificationDto
+            {
+                Id = notification.Id,
+
+                UserId = notification.UserId,
+
+                Title = notification.Title,
+
+                Message = notification.Message,
+
+                Type = notification.Type,
+
+                IsRead = notification.IsRead,
+
+                ReadAt = notification.ReadAt,
+
+                CreatedAt = notification.CreatedAt
+            });
     }
 }

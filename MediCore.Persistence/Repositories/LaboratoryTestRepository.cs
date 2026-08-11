@@ -43,12 +43,16 @@ public class LaboratoryTestRepository : ILaboratoryTestRepository
     }
 
     public async Task<bool> ExistsByNameAsync(
-        string name,
-        CancellationToken cancellationToken)
+         string name,
+         int excludeId,
+         CancellationToken cancellationToken)
     {
         return await _context.LaboratoryTests
             .AnyAsync(
-                t => t.Name == name && !t.IsDeleted,
+                t =>
+                    t.Name == name &&
+                    t.Id != excludeId &&
+                    !t.IsDeleted,
                 cancellationToken);
     }
 

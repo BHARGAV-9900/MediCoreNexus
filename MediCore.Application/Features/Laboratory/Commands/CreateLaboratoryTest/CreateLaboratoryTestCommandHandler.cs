@@ -17,19 +17,22 @@ public class CreateLaboratoryTestCommandHandler
     }
 
     public async Task<int> Handle(
-        CreateLaboratoryTestCommand request,
-        CancellationToken cancellationToken)
+    CreateLaboratoryTestCommand request,
+    CancellationToken cancellationToken)
     {
+        var name = request.Name.Trim();
+
         var exists = await _repository.ExistsByNameAsync(
-            request.Name,
+            name,
+            0,
             cancellationToken);
 
         if (exists)
             throw new ConflictException(
-                $"Laboratory test '{request.Name}' already exists.");
+                $"Laboratory test '{name}' already exists.");
 
         var laboratoryTest = new LaboratoryTest(
-            request.Name,
+            name,
             request.Price,
             request.Description);
 

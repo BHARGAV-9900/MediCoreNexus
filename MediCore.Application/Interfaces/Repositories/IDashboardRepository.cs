@@ -5,5 +5,5 @@ namespace MediCore.Application.Interfaces.Repositories;
 public interface IDashboardRepository
 {
     Task<DashboardDto> GetDashboardAsync(
-        CancellationToken cancellationToken);
+        CancellationToken cancellationToken = default);
 }

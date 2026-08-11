@@ -10,6 +10,7 @@ public class Appointment : BaseAuditableEntity
     {
     }
 
+
     // Business Constructor
     public Appointment(
         int patientId,
@@ -28,11 +29,13 @@ public class Appointment : BaseAuditableEntity
         Status = AppointmentStatus.Scheduled;
     }
 
+
     // Foreign Keys
 
     public int PatientId { get; private set; }
 
     public int DoctorId { get; private set; }
+
 
     // Appointment Details
 
@@ -44,6 +47,7 @@ public class Appointment : BaseAuditableEntity
 
     public string? Notes { get; private set; }
 
+
     // Navigation Properties
 
     public Patient? Patient { get; private set; }
@@ -51,85 +55,167 @@ public class Appointment : BaseAuditableEntity
     public Doctor? Doctor { get; private set; }
 
     public MedicalRecord? MedicalRecord { get; private set; }
+
     public Prescription? Prescription { get; private set; }
+
     public Bill? Bill { get; private set; }
-    public ICollection<LaboratoryOrder> LaboratoryOrders { get; private set; }
-    = new List<LaboratoryOrder>();
-    //Domain Behaviors
-    public void Complete()
+
+    public ICollection<LaboratoryOrder> LaboratoryOrders
     {
-        if (Status == AppointmentStatus.Cancelled)
-            throw new ArgumentException("Cancelled appointments cannot be completed.");
+        get;
+        private set;
+    } = new List<LaboratoryOrder>();
 
-        Status = AppointmentStatus.Completed;
-        UpdatedAt = DateTime.UtcNow;
-    }
 
-    public void Cancel()
-    {
-        if (Status == AppointmentStatus.Completed)
-            throw new ArgumentException("Completed appointments cannot be cancelled.");
-
-        Status = AppointmentStatus.Cancelled;
-        UpdatedAt = DateTime.UtcNow;
-    }
+    // =========================================================
+    // Domain Behaviors
+    // =========================================================
 
     public void CheckIn()
     {
         if (Status != AppointmentStatus.Scheduled)
-            throw new ArgumentException("Only scheduled appointments can be checked in.");
+        {
+            throw new ArgumentException(
+                "Only scheduled appointments can be checked in.");
+        }
 
         Status = AppointmentStatus.CheckedIn;
+
         UpdatedAt = DateTime.UtcNow;
     }
+
 
     public void StartConsultation()
     {
         if (Status != AppointmentStatus.CheckedIn)
-            throw new ArgumentException("Patient must check in first.");
+        {
+            throw new ArgumentException(
+                "Patient must check in first.");
+        }
 
         Status = AppointmentStatus.InProgress;
+
         UpdatedAt = DateTime.UtcNow;
     }
+
+
+    public void Complete()
+    {
+        if (Status != AppointmentStatus.InProgress)
+        {
+            throw new ArgumentException(
+                "Only appointments in progress can be completed.");
+        }
+
+        Status = AppointmentStatus.Completed;
+
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+
+    public void Cancel()
+    {
+        if (Status == AppointmentStatus.Completed)
+        {
+            throw new ArgumentException(
+                "Completed appointments cannot be cancelled.");
+        }
+
+        if (Status == AppointmentStatus.Cancelled)
+        {
+            throw new ArgumentException(
+                "Appointment is already cancelled.");
+        }
+
+        if (Status == AppointmentStatus.NoShow)
+        {
+            throw new ArgumentException(
+                "No-show appointments cannot be cancelled.");
+        }
+
+        Status = AppointmentStatus.Cancelled;
+
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+
+    public void MarkNoShow()
+    {
+        if (Status != AppointmentStatus.Scheduled)
+        {
+            throw new ArgumentException(
+                "Only scheduled appointments can be marked as no show.");
+        }
+
+        Status = AppointmentStatus.NoShow;
+
+        UpdatedAt = DateTime.UtcNow;
+    }
+
 
     public void UpdateNotes(string? notes)
     {
         Notes = notes;
+
         UpdatedAt = DateTime.UtcNow;
     }
 
-    //Validation Methods
+
+    // =========================================================
+    // Validation Methods
+    // =========================================================
+
     private void SetPatient(int patientId)
     {
         if (patientId <= 0)
-            throw new ArgumentException("Invalid patient.");
+        {
+            throw new ArgumentException(
+                "Invalid patient.");
+        }
 
         PatientId = patientId;
     }
 
+
     private void SetDoctor(int doctorId)
     {
         if (doctorId <= 0)
-            throw new ArgumentException("Invalid doctor.");
+        {
+            throw new ArgumentException(
+                "Invalid doctor.");
+        }
 
         DoctorId = doctorId;
     }
 
+
     private void SetAppointmentDate(DateTime appointmentDate)
     {
         if (appointmentDate < DateTime.Now)
-            throw new ArgumentException("Appointment cannot be scheduled in the past.");
+        {
+            throw new ArgumentException(
+                "Appointment cannot be scheduled in the past.");
+        }
 
         AppointmentDate = appointmentDate;
     }
 
+
     private void SetReason(string reason)
     {
         if (string.IsNullOrWhiteSpace(reason))
-            throw new ArgumentException("Reason is required.");
+        {
+            throw new ArgumentException(
+                "Reason is required.");
+        }
 
         Reason = reason.Trim();
     }
+
+
+    // =========================================================
+    // Update Appointment
+    // =========================================================
 
     public void Update(
         DateTime appointmentDate,
@@ -137,6 +223,7 @@ public class Appointment : BaseAuditableEntity
         string? notes)
     {
         SetAppointmentDate(appointmentDate);
+
         SetReason(reason);
 
         Notes = notes;
@@ -144,10 +231,17 @@ public class Appointment : BaseAuditableEntity
         UpdatedAt = DateTime.UtcNow;
     }
 
+
+    // =========================================================
+    // Soft Delete
+    // =========================================================
+
     public void Delete()
     {
         IsDeleted = true;
+
         DeletedAt = DateTime.UtcNow;
+
         UpdatedAt = DateTime.UtcNow;
     }
 }

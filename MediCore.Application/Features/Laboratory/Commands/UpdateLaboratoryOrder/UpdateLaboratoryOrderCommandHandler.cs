@@ -49,6 +49,10 @@ public class UpdateLaboratoryOrderCommandHandler
             throw new NotFoundException(
                 $"Laboratory test with Id {request.LaboratoryTestId} was not found.");
 
+        if (!laboratoryTest.IsActive)
+            throw new ConflictException(
+                "The selected laboratory test is inactive and cannot be ordered.");
+
         var exists = await _laboratoryOrderRepository.ExistsAsync(
             request.AppointmentId,
             request.LaboratoryTestId,

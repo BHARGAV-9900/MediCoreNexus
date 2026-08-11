@@ -28,6 +28,16 @@ builder.Services.AddInfrastructureServices(builder.Configuration);
 // Add services to the container.
 
 builder.Services.AddControllers();
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AngularPolicy", policy =>
+    {
+        policy
+            .WithOrigins("http://localhost:4200")
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
 
 builder.Services
     .AddApiVersioning(options =>
@@ -103,6 +113,8 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseSerilogRequestLogging();
+
+app.UseCors("AngularPolicy");
 
 app.UseAuthentication();
 

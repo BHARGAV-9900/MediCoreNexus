@@ -54,5 +54,7 @@ public class LaboratoryOrder : BaseAuditableEntity
         IsDeleted = true;
         DeletedAt = DateTime.UtcNow;
         UpdatedAt = DateTime.UtcNow;
+
+        LaboratoryResult?.Delete();
     }
 }
