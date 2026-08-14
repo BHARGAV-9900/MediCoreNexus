@@ -27,48 +27,59 @@ public static class InfrastructureServiceRegistration
         services.AddScoped<ICurrentUserService, CurrentUserService>();
 
         services.Configure<JwtSettings>(
-                configuration.GetSection(JwtSettings.SectionName));
+            configuration.GetSection(JwtSettings.SectionName));
+
         var jwtSettings = configuration
             .GetSection(JwtSettings.SectionName)
             .Get<JwtSettings>()!;
 
         services
-    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
-    {
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
-
-            ValidIssuer = jwtSettings.Issuer,
-            ValidAudience = jwtSettings.Audience,
-
-            IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(jwtSettings.SecretKey)),
-
-            ClockSkew = TimeSpan.Zero
-        };
-
-        options.Events = new JwtBearerEvents
-        {
-            OnAuthenticationFailed = context =>
+            .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer(options =>
             {
-                Console.WriteLine("==================================");
-                Console.WriteLine("JWT AUTHENTICATION FAILED");
-                Console.WriteLine(context.Exception);
-                Console.WriteLine("==================================");
-                return Task.CompletedTask;
-            }
-        };
-    });
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+
+                    ValidIssuer = jwtSettings.Issuer,
+                    ValidAudience = jwtSettings.Audience,
+
+                    IssuerSigningKey = new SymmetricSecurityKey(
+                        Encoding.UTF8.GetBytes(jwtSettings.SecretKey)),
+
+                    ClockSkew = TimeSpan.Zero
+                };
+
+                options.Events = new JwtBearerEvents
+                {
+                    OnAuthenticationFailed = context =>
+                    {
+                        Console.WriteLine("==================================");
+                        Console.WriteLine("JWT AUTHENTICATION FAILED");
+                        Console.WriteLine(context.Exception);
+                        Console.WriteLine("==================================");
+
+                        return Task.CompletedTask;
+                    }
+                };
+            });
 
         services.AddAuthorization(options =>
         {
+            // ==========================================
+            // ADMIN
+            // ==========================================
+
             options.AddPolicy("AdminOnly", policy =>
                 policy.RequireRole("Admin"));
+
+
+            // ==========================================
+            // PATIENTS
+            // ==========================================
 
             options.AddPolicy("PatientManagement", policy =>
                 policy.RequireRole(
@@ -76,11 +87,21 @@ public static class InfrastructureServiceRegistration
                     "Doctor",
                     "Receptionist"));
 
+
+            // ==========================================
+            // APPOINTMENTS
+            // ==========================================
+
             options.AddPolicy("AppointmentManagement", policy =>
                 policy.RequireRole(
                     "Admin",
                     "Doctor",
                     "Receptionist"));
+
+
+            // ==========================================
+            // DOCTORS
+            // ==========================================
 
             options.AddPolicy("DoctorView", policy =>
                 policy.RequireRole(
@@ -91,6 +112,11 @@ public static class InfrastructureServiceRegistration
             options.AddPolicy("DoctorManagement", policy =>
                 policy.RequireRole("Admin"));
 
+
+            // ==========================================
+            // DEPARTMENTS
+            // ==========================================
+
             options.AddPolicy("DepartmentView", policy =>
                 policy.RequireRole(
                     "Admin",
@@ -99,10 +125,20 @@ public static class InfrastructureServiceRegistration
             options.AddPolicy("DepartmentManagement", policy =>
                 policy.RequireRole("Admin"));
 
+
+            // ==========================================
+            // MEDICAL RECORDS
+            // ==========================================
+
             options.AddPolicy("MedicalRecordManagement", policy =>
                 policy.RequireRole(
                     "Admin",
                     "Doctor"));
+
+
+            // ==========================================
+            // LABORATORY
+            // ==========================================
 
             options.AddPolicy("LaboratoryManagement", policy =>
                 policy.RequireRole(
@@ -110,15 +146,71 @@ public static class InfrastructureServiceRegistration
                     "Doctor",
                     "Lab Technician"));
 
+
+            // ==========================================
+            // PHARMACY
+            // ==========================================
+
             options.AddPolicy("PharmacyManagement", policy =>
                 policy.RequireRole(
                     "Admin",
                     "Pharmacist"));
 
+
+            // ==========================================
+            // PRESCRIPTIONS
+            // ==========================================
+
             options.AddPolicy("PrescriptionManagement", policy =>
                 policy.RequireRole(
                     "Admin",
                     "Doctor",
+                    "Pharmacist"));
+
+
+            // ==========================================
+            // BILLING
+            // ==========================================
+
+            options.AddPolicy("BillingManagement", policy =>
+                policy.RequireRole(
+                    "Admin",
+                    "Accountant",
+                    "Receptionist"));
+
+
+            // ==========================================
+            // PAYMENTS
+            // ==========================================
+
+            options.AddPolicy("PaymentManagement", policy =>
+                policy.RequireRole(
+                    "Admin",
+                    "Accountant",
+                    "Receptionist"));
+
+
+            // ==========================================
+            // NOTIFICATIONS
+            // ==========================================
+
+            options.AddPolicy("NotificationManagement", policy =>
+                policy.RequireRole(
+                    "Admin",
+                    "Doctor",
+                    "Receptionist",
+                    "Lab Technician",
+                    "Pharmacist",
+                    "Accountant"));
+
+
+            // ==========================================
+            // INVENTORY
+            // ==========================================
+
+            options.AddPolicy("InventoryManagement", policy =>
+                policy.RequireRole(
+                    "Admin",
                     "Pharmacist"));
         });
 

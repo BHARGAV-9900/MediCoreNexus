@@ -9,10 +9,12 @@ using MediCore.Application.Features.Inventory.Queries.GetExpiringInventory;
 using MediCore.Application.Features.Inventory.Queries.GetInventoryById;
 using MediCore.Application.Features.Inventory.Queries.GetLowStockInventory;
 using MediCore.Shared.Responses;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MediCore.API.Controllers;
 
+[Authorize(Policy = "InventoryManagement")]
 [ApiController]
 [ApiVersion("1.0")]
 [Route("api/v{version:apiVersion}/[controller]")]
@@ -30,7 +32,9 @@ public class InventoryController : ControllerBase
         CreateInventoryCommand command,
         CancellationToken cancellationToken)
     {
-        var id = await _mediator.Send(command, cancellationToken);
+        var id = await _mediator.Send(
+            command,
+            cancellationToken);
 
         return CreatedAtAction(
             nameof(GetById),

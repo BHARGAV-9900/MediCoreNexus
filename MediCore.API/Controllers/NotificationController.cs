@@ -8,10 +8,12 @@ using MediCore.Application.Features.Notification.Queries.GetAllNotifications;
 using MediCore.Application.Features.Notification.Queries.GetNotificationById;
 using MediCore.Application.Features.Notification.Queries.GetUnreadNotifications;
 using MediCore.Shared.Responses;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MediCore.API.Controllers;
 
+[Authorize(Policy = "NotificationManagement")]
 [ApiController]
 [ApiVersion("1.0")]
 [Route("api/v{version:apiVersion}/[controller]")]

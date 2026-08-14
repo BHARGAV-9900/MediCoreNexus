@@ -7,10 +7,12 @@ using MediCore.Application.Features.Billing.Queries;
 using MediCore.Application.Features.Billing.Queries.GetAllBills;
 using MediCore.Application.Features.Billing.Queries.GetBillById;
 using MediCore.Shared.Responses;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MediCore.API.Controllers;
 
+[Authorize(Policy = "BillingManagement")]
 [ApiController]
 [ApiVersion("1.0")]
 [Route("api/v{version:apiVersion}/[controller]")]

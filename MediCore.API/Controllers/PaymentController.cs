@@ -8,10 +8,12 @@ using MediCore.Application.Features.Billing.Queries.GetAllPayments;
 using MediCore.Application.Features.Billing.Queries.GetPaymentById;
 using MediCore.Application.Features.Billing.Queries.GetPaymentsByBill;
 using MediCore.Shared.Responses;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MediCore.API.Controllers;
 
+[Authorize(Policy = "PaymentManagement")]
 [ApiController]
 [ApiVersion("1.0")]
 [Route("api/v{version:apiVersion}/[controller]")]
@@ -63,7 +65,8 @@ public class PaymentController : ControllerBase
     }
 
     [HttpGet("bill/{billId:int}")]
-    public async Task<ActionResult<ApiResponse<IEnumerable<PaymentDto>>>> GetByBill(int billId)
+    public async Task<ActionResult<ApiResponse<IEnumerable<PaymentDto>>>> GetByBill(
+        int billId)
     {
         var payments = await _mediator.Send(
             new GetPaymentsByBillQuery(billId));
