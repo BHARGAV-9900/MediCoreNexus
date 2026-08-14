@@ -21,9 +21,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Application\" />
-    <Folder Include="Domain\" />
-    <Folder Include="Infrastructure\" />
+    <ProjectReference Include="..\MediCore.Domain\MediCore.Domain.csproj" />
+    <ProjectReference Include="..\MediCore.Application\MediCore.Application.csproj" />
   </ItemGroup>
 
 </Project>

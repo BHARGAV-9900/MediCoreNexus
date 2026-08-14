@@ -90,8 +90,10 @@ builder.Services.AddSwaggerGen(options =>
 
 var app = builder.Build();
 
-using (var scope = app.Services.CreateScope())
+if (!app.Environment.IsEnvironment("Testing"))
 {
+    using var scope = app.Services.CreateScope();
+
     var context = scope.ServiceProvider
         .GetRequiredService<ApplicationDbContext>();
 
@@ -123,3 +125,9 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+
+
+public partial class Program
+{
+}
