@@ -2,6 +2,7 @@
 using MediatR;
 using MediCore.Application.Features.Dashboard.Queries.GetDashboard;
 using MediCore.Shared.Responses;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MediCore.API.Controllers;
@@ -9,6 +10,7 @@ namespace MediCore.API.Controllers;
 [ApiController]
 [ApiVersion("1.0")]
 [Route("api/v{version:apiVersion}/[controller]")]
+[Authorize]
 public class DashboardController : ControllerBase
 {
     private readonly IMediator _mediator;

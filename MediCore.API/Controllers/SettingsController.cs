@@ -3,6 +3,7 @@ using MediatR;
 using MediCore.Application.Features.Settings.Commands.UpdateSettings;
 using MediCore.Application.Features.Settings.Queries.GetSettings;
 using MediCore.Shared.Responses;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MediCore.API.Controllers;
@@ -10,6 +11,7 @@ namespace MediCore.API.Controllers;
 [ApiController]
 [ApiVersion("1.0")]
 [Route("api/v{version:apiVersion}/[controller]")]
+[Authorize(Policy = "AdminOnly")]
 public class SettingsController : ControllerBase
 {
     private readonly IMediator _mediator;

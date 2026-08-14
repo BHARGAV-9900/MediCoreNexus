@@ -212,7 +212,17 @@ public static class InfrastructureServiceRegistration
                 policy.RequireRole(
                     "Admin",
                     "Pharmacist"));
-        });
+
+
+            //=============================================
+            // REPORTS
+            //============================================
+
+            options.AddPolicy("ReportsManagement", policy =>
+                policy.RequireRole(
+                    "Admin",
+                    "Accountant"));
+                    });
 
         return services;
     }
