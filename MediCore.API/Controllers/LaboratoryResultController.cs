@@ -7,10 +7,12 @@ using MediCore.Application.Features.Laboratory.Queries;
 using MediCore.Application.Features.Laboratory.Queries.GetAllLaboratoryResults;
 using MediCore.Application.Features.Laboratory.Queries.GetLaboratoryResultById;
 using MediCore.Shared.Responses;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MediCore.API.Controllers;
 
+[Authorize(Policy = "LaboratoryManagement")]
 [ApiController]
 [ApiVersion("1.0")]
 [Route("api/v{version:apiVersion}/[controller]")]
@@ -24,7 +26,8 @@ public class LaboratoryResultController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<ApiResponse<int>>> Create(CreateLaboratoryResultCommand command)
+    public async Task<ActionResult<ApiResponse<int>>> Create(
+        CreateLaboratoryResultCommand command)
     {
         var id = await _mediator.Send(command);
 
@@ -39,44 +42,54 @@ public class LaboratoryResultController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<ApiResponse<IEnumerable<LaboratoryResultDto>>>> GetAll()
     {
-        var results = await _mediator.Send(new GetAllLaboratoryResultsQuery());
+        var results = await _mediator.Send(
+            new GetAllLaboratoryResultsQuery());
 
-        return Ok(ApiResponse<IEnumerable<LaboratoryResultDto>>
-            .SuccessResponse(
-                results,
-                "Laboratory results retrieved successfully."));
+        return Ok(
+            ApiResponse<IEnumerable<LaboratoryResultDto>>
+                .SuccessResponse(
+                    results,
+                    "Laboratory results retrieved successfully."));
     }
 
     [HttpGet("{id:int}")]
-    public async Task<ActionResult<ApiResponse<LaboratoryResultDto>>> GetById(int id)
+    public async Task<ActionResult<ApiResponse<LaboratoryResultDto>>> GetById(
+        int id)
     {
-        var result = await _mediator.Send(new GetLaboratoryResultByIdQuery(id));
+        var result = await _mediator.Send(
+            new GetLaboratoryResultByIdQuery(id));
 
-        return Ok(ApiResponse<LaboratoryResultDto>
-            .SuccessResponse(
-                result,
-                "Laboratory result retrieved successfully."));
+        return Ok(
+            ApiResponse<LaboratoryResultDto>
+                .SuccessResponse(
+                    result,
+                    "Laboratory result retrieved successfully."));
     }
 
     [HttpPut]
-    public async Task<ActionResult<ApiResponse<bool>>> Update(UpdateLaboratoryResultCommand command)
+    public async Task<ActionResult<ApiResponse<bool>>> Update(
+        UpdateLaboratoryResultCommand command)
     {
         var updated = await _mediator.Send(command);
 
-        return Ok(ApiResponse<bool>
-            .SuccessResponse(
-                updated,
-                "Laboratory result updated successfully."));
+        return Ok(
+            ApiResponse<bool>
+                .SuccessResponse(
+                    updated,
+                    "Laboratory result updated successfully."));
     }
 
     [HttpDelete("{id:int}")]
-    public async Task<ActionResult<ApiResponse<bool>>> Delete(int id)
+    public async Task<ActionResult<ApiResponse<bool>>> Delete(
+        int id)
     {
-        var deleted = await _mediator.Send(new DeleteLaboratoryResultCommand(id));
+        var deleted = await _mediator.Send(
+            new DeleteLaboratoryResultCommand(id));
 
-        return Ok(ApiResponse<bool>
-            .SuccessResponse(
-                deleted,
-                "Laboratory result deleted successfully."));
+        return Ok(
+            ApiResponse<bool>
+                .SuccessResponse(
+                    deleted,
+                    "Laboratory result deleted successfully."));
     }
 }

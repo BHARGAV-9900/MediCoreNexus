@@ -8,10 +8,13 @@ using MediCore.Application.Features.PrescriptionItems.Queries.GetAllPrescription
 using MediCore.Application.Features.PrescriptionItems.Queries.GetPrescriptionItemById;
 using MediCore.Application.Features.PrescriptionItems.Queries.GetPrescriptionItemsByPrescription;
 using MediCore.Shared.Responses;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+
 
 namespace MediCore.API.Controllers;
 
+[Authorize(Policy = "PrescriptionManagement")]
 [ApiController]
 [ApiVersion("1.0")]
 [Route("api/v{version:apiVersion}/[controller]")]

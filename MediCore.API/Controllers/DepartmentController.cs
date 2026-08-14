@@ -6,12 +6,12 @@ using MediCore.Application.Features.Departments.Commands.UpdateDepartment;
 using MediCore.Application.Features.Departments.Queries.GetAllDepartments;
 using MediCore.Application.Features.Departments.Queries.GetDepartmentById;
 using MediCore.Shared.Responses;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace MediCore.API.Controllers;
 
-[Authorize(Policy = "AdminOnly")]
+[Authorize(Policy = "DepartmentView")]
 [ApiController]
 [ApiVersion("1.0")]
 [Route("api/v{version:apiVersion}/[controller]")]
@@ -24,9 +24,13 @@ public class DepartmentController : ControllerBase
         _mediator = mediator;
     }
 
-    
-    
+
+    // =========================================================
+    // CREATE DEPARTMENT
+    // =========================================================
+
     [HttpPost]
+    [Authorize(Policy = "DepartmentManagement")]
     public async Task<IActionResult> Create(
         CreateDepartmentCommand command)
     {
@@ -39,10 +43,18 @@ public class DepartmentController : ControllerBase
                 id,
                 "Department created successfully."));
     }
+
+
+    // =========================================================
+    // GET ALL DEPARTMENTS
+    // =========================================================
+
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
-        var result = await _mediator.Send(new GetAllDepartmentsQuery());
+        var result =
+            await _mediator.Send(
+                new GetAllDepartmentsQuery());
 
         return Ok(
             ApiResponse<IEnumerable<DepartmentDto>>
@@ -50,11 +62,18 @@ public class DepartmentController : ControllerBase
                     result,
                     "Departments retrieved successfully."));
     }
+
+
+    // =========================================================
+    // GET DEPARTMENT BY ID
+    // =========================================================
+
     [HttpGet("{id:int}")]
     public async Task<IActionResult> GetById(int id)
     {
-        var result = await _mediator.Send(
-            new GetDepartmentByIdQuery(id));
+        var result =
+            await _mediator.Send(
+                new GetDepartmentByIdQuery(id));
 
         return Ok(
             ApiResponse<DepartmentDto>
@@ -62,10 +81,17 @@ public class DepartmentController : ControllerBase
                     result,
                     "Department retrieved successfully."));
     }
+
+
+    // =========================================================
+    // UPDATE DEPARTMENT
+    // =========================================================
+
     [HttpPut("{id:int}")]
+    [Authorize(Policy = "DepartmentManagement")]
     public async Task<IActionResult> Update(
-    int id,
-    UpdateDepartmentCommand command)
+        int id,
+        UpdateDepartmentCommand command)
     {
         if (id != command.Id)
         {
@@ -81,7 +107,14 @@ public class DepartmentController : ControllerBase
                 true,
                 "Department updated successfully."));
     }
+
+
+    // =========================================================
+    // DELETE DEPARTMENT
+    // =========================================================
+
     [HttpDelete("{id:int}")]
+    [Authorize(Policy = "DepartmentManagement")]
     public async Task<IActionResult> Delete(int id)
     {
         await _mediator.Send(

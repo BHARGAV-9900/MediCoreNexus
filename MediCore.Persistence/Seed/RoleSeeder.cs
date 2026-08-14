@@ -8,21 +8,27 @@ public static class RoleSeeder
 {
     public static async Task SeedAsync(ApplicationDbContext context)
     {
-        if (await context.Roles.AnyAsync())
+        var requiredRoles = new[]
         {
-            return;
-        }
-
-        var roles = new List<Role>
-        {
-            new("Admin"),
-            new("Doctor"),
-            new("Receptionist"),
-            new("Lab Technician"),
-            new("Pharmacist")
+            "Admin",
+            "Doctor",
+            "Receptionist",
+            "Lab Technician",
+            "Pharmacist",
+            "Accountant"
         };
 
-        await context.Roles.AddRangeAsync(roles);
+        foreach (var roleName in requiredRoles)
+        {
+            var exists = await context.Roles
+                .AnyAsync(r => r.Name == roleName);
+
+            if (!exists)
+            {
+                await context.Roles.AddAsync(
+                    new Role(roleName));
+            }
+        }
 
         await context.SaveChangesAsync();
     }

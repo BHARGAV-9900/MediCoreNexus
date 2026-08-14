@@ -71,7 +71,10 @@ public static class InfrastructureServiceRegistration
                 policy.RequireRole("Admin"));
 
             options.AddPolicy("PatientManagement", policy =>
-                policy.RequireRole("Admin", "Receptionist"));
+                policy.RequireRole(
+                    "Admin",
+                    "Doctor",
+                    "Receptionist"));
 
             options.AddPolicy("AppointmentManagement", policy =>
                 policy.RequireRole(
@@ -79,8 +82,44 @@ public static class InfrastructureServiceRegistration
                     "Doctor",
                     "Receptionist"));
 
+            options.AddPolicy("DoctorView", policy =>
+                policy.RequireRole(
+                    "Admin",
+                    "Doctor",
+                    "Receptionist"));
+
             options.AddPolicy("DoctorManagement", policy =>
                 policy.RequireRole("Admin"));
+
+            options.AddPolicy("DepartmentView", policy =>
+                policy.RequireRole(
+                    "Admin",
+                    "Receptionist"));
+
+            options.AddPolicy("DepartmentManagement", policy =>
+                policy.RequireRole("Admin"));
+
+            options.AddPolicy("MedicalRecordManagement", policy =>
+                policy.RequireRole(
+                    "Admin",
+                    "Doctor"));
+
+            options.AddPolicy("LaboratoryManagement", policy =>
+                policy.RequireRole(
+                    "Admin",
+                    "Doctor",
+                    "Lab Technician"));
+
+            options.AddPolicy("PharmacyManagement", policy =>
+                policy.RequireRole(
+                    "Admin",
+                    "Pharmacist"));
+
+            options.AddPolicy("PrescriptionManagement", policy =>
+                policy.RequireRole(
+                    "Admin",
+                    "Doctor",
+                    "Pharmacist"));
         });
 
         return services;

@@ -7,10 +7,12 @@ using MediCore.Application.Features.Laboratory.Queries;
 using MediCore.Application.Features.Laboratory.Queries.GetAllLaboratoryTests;
 using MediCore.Application.Features.Laboratory.Queries.GetLaboratoryTestById;
 using MediCore.Shared.Responses;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MediCore.API.Controllers;
 
+[Authorize(Policy = "LaboratoryManagement")]
 [ApiController]
 [ApiVersion("1.0")]
 [Route("api/v{version:apiVersion}/[controller]")]
@@ -43,22 +45,25 @@ public class LaboratoryTestController : ControllerBase
         var tests = await _mediator.Send(
             new GetAllLaboratoryTestsQuery());
 
-        return Ok(ApiResponse<IEnumerable<LaboratoryTestDto>>
-            .SuccessResponse(
-                tests,
-                "Laboratory tests retrieved successfully."));
+        return Ok(
+            ApiResponse<IEnumerable<LaboratoryTestDto>>
+                .SuccessResponse(
+                    tests,
+                    "Laboratory tests retrieved successfully."));
     }
 
     [HttpGet("{id:int}")]
-    public async Task<ActionResult<ApiResponse<LaboratoryTestDto>>> GetById(int id)
+    public async Task<ActionResult<ApiResponse<LaboratoryTestDto>>> GetById(
+        int id)
     {
         var test = await _mediator.Send(
             new GetLaboratoryTestByIdQuery(id));
 
-        return Ok(ApiResponse<LaboratoryTestDto>
-            .SuccessResponse(
-                test,
-                "Laboratory test retrieved successfully."));
+        return Ok(
+            ApiResponse<LaboratoryTestDto>
+                .SuccessResponse(
+                    test,
+                    "Laboratory test retrieved successfully."));
     }
 
     [HttpPut]
@@ -67,21 +72,24 @@ public class LaboratoryTestController : ControllerBase
     {
         var result = await _mediator.Send(command);
 
-        return Ok(ApiResponse<bool>
-            .SuccessResponse(
-                result,
-                "Laboratory test updated successfully."));
+        return Ok(
+            ApiResponse<bool>
+                .SuccessResponse(
+                    result,
+                    "Laboratory test updated successfully."));
     }
 
     [HttpDelete("{id:int}")]
-    public async Task<ActionResult<ApiResponse<bool>>> Delete(int id)
+    public async Task<ActionResult<ApiResponse<bool>>> Delete(
+        int id)
     {
         var result = await _mediator.Send(
             new DeleteLaboratoryTestCommand(id));
 
-        return Ok(ApiResponse<bool>
-            .SuccessResponse(
-                result,
-                "Laboratory test deleted successfully."));
+        return Ok(
+            ApiResponse<bool>
+                .SuccessResponse(
+                    result,
+                    "Laboratory test deleted successfully."));
     }
 }

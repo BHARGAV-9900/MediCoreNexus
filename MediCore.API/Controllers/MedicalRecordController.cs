@@ -7,10 +7,12 @@ using MediCore.Application.Features.MedicalRecords.Queries;
 using MediCore.Application.Features.MedicalRecords.Queries.GetAllMedicalRecords;
 using MediCore.Application.Features.MedicalRecords.Queries.GetMedicalRecordById;
 using MediCore.Shared.Responses;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MediCore.API.Controllers;
 
+[Authorize(Policy = "MedicalRecordManagement")]
 [ApiController]
 [ApiVersion("1.0")]
 [Route("api/v{version:apiVersion}/[controller]")]
@@ -23,12 +25,19 @@ public class MedicalRecordController : ControllerBase
         _mediator = mediator;
     }
 
+
+    // =========================================================
+    // CREATE MEDICAL RECORD
+    // =========================================================
+
     [HttpPost]
     public async Task<IActionResult> Create(
         CreateMedicalRecordCommand command,
         CancellationToken cancellationToken)
     {
-        var id = await _mediator.Send(command, cancellationToken);
+        var id = await _mediator.Send(
+            command,
+            cancellationToken);
 
         return CreatedAtAction(
             nameof(GetById),
@@ -37,6 +46,11 @@ public class MedicalRecordController : ControllerBase
                 id,
                 "Medical record created successfully."));
     }
+
+
+    // =========================================================
+    // GET ALL MEDICAL RECORDS
+    // =========================================================
 
     [HttpGet]
     public async Task<IActionResult> GetAll(
@@ -47,10 +61,16 @@ public class MedicalRecordController : ControllerBase
             cancellationToken);
 
         return Ok(
-            ApiResponse<IEnumerable<MedicalRecordDto>>.SuccessResponse(
-                records,
-                "Medical records retrieved successfully."));
+            ApiResponse<IEnumerable<MedicalRecordDto>>
+                .SuccessResponse(
+                    records,
+                    "Medical records retrieved successfully."));
     }
+
+
+    // =========================================================
+    // GET MEDICAL RECORD BY ID
+    // =========================================================
 
     [HttpGet("{id:int}")]
     public async Task<IActionResult> GetById(
@@ -62,10 +82,16 @@ public class MedicalRecordController : ControllerBase
             cancellationToken);
 
         return Ok(
-            ApiResponse<MedicalRecordDto>.SuccessResponse(
-                record,
-                "Medical record retrieved successfully."));
+            ApiResponse<MedicalRecordDto>
+                .SuccessResponse(
+                    record,
+                    "Medical record retrieved successfully."));
     }
+
+
+    // =========================================================
+    // UPDATE MEDICAL RECORD
+    // =========================================================
 
     [HttpPut("{id:int}")]
     public async Task<IActionResult> Update(
@@ -74,15 +100,26 @@ public class MedicalRecordController : ControllerBase
         CancellationToken cancellationToken)
     {
         if (id != command.Id)
-            return BadRequest("Route Id and Command Id must match.");
+        {
+            return BadRequest(
+                ApiResponse<object>.FailureResponse(
+                    "Route Id and Command Id must match."));
+        }
 
-        await _mediator.Send(command, cancellationToken);
+        await _mediator.Send(
+            command,
+            cancellationToken);
 
         return Ok(
             ApiResponse<bool>.SuccessResponse(
                 true,
                 "Medical record updated successfully."));
     }
+
+
+    // =========================================================
+    // DELETE MEDICAL RECORD
+    // =========================================================
 
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> Delete(
