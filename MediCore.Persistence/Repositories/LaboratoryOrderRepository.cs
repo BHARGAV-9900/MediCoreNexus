@@ -23,30 +23,52 @@ public class LaboratoryOrderRepository : ILaboratoryOrderRepository
             cancellationToken);
     }
 
+
     public async Task<LaboratoryOrder?> GetByIdAsync(
         int id,
         CancellationToken cancellationToken)
     {
         return await _context.LaboratoryOrders
+
             .Include(o => o.Appointment)
+                .ThenInclude(a => a!.Patient)
+
+            .Include(o => o.Appointment)
+                .ThenInclude(a => a!.Doctor)
+
             .Include(o => o.LaboratoryTest)
+
             .Include(o => o.LaboratoryResult)
+
             .FirstOrDefaultAsync(
-                o => o.Id == id && !o.IsDeleted,
+                o => o.Id == id &&
+                     !o.IsDeleted,
                 cancellationToken);
     }
+
 
     public async Task<IEnumerable<LaboratoryOrder>> GetAllAsync(
         CancellationToken cancellationToken)
     {
         return await _context.LaboratoryOrders
+
             .Include(o => o.Appointment)
+                .ThenInclude(a => a!.Patient)
+
+            .Include(o => o.Appointment)
+                .ThenInclude(a => a!.Doctor)
+
             .Include(o => o.LaboratoryTest)
+
             .Include(o => o.LaboratoryResult)
+
             .Where(o => !o.IsDeleted)
+
             .OrderByDescending(o => o.CreatedAt)
+
             .ToListAsync(cancellationToken);
     }
+
 
     public async Task<bool> ExistsAsync(
         int appointmentId,
@@ -54,16 +76,20 @@ public class LaboratoryOrderRepository : ILaboratoryOrderRepository
         CancellationToken cancellationToken)
     {
         return await _context.LaboratoryOrders
+
             .AnyAsync(
-                o => o.AppointmentId == appointmentId &&
-                     o.LaboratoryTestId == laboratoryTestId &&
-                     !o.IsDeleted,
+                o =>
+                    o.AppointmentId == appointmentId &&
+                    o.LaboratoryTestId == laboratoryTestId &&
+                    !o.IsDeleted,
                 cancellationToken);
     }
+
 
     public async Task SaveChangesAsync(
         CancellationToken cancellationToken)
     {
-        await _context.SaveChangesAsync(cancellationToken);
+        await _context.SaveChangesAsync(
+            cancellationToken);
     }
 }
