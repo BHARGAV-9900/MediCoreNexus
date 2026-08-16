@@ -14,6 +14,8 @@ public class DashboardDto
 
     public int TotalMedicines { get; set; }
 
+    public int LowStockMedicines { get; set; }
+
     public int PendingBills { get; set; }
 
     public int PaidBills { get; set; }

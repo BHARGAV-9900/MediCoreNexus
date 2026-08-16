@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+
 using MediCore.Application.Features.Dashboard.Queries.GetDashboard;
 using MediCore.Application.Interfaces.Repositories;
 using MediCore.Persistence.Context;
@@ -27,14 +28,12 @@ public class DashboardRepository : IDashboardRepository
         var totalPatients = await _context.Patients
             .CountAsync(cancellationToken);
 
-
         // -----------------------------
         // DOCTORS
         // -----------------------------
 
         var totalDoctors = await _context.Doctors
             .CountAsync(cancellationToken);
-
 
         // -----------------------------
         // DEPARTMENTS
@@ -43,14 +42,12 @@ public class DashboardRepository : IDashboardRepository
         var totalDepartments = await _context.Departments
             .CountAsync(cancellationToken);
 
-
         // -----------------------------
         // APPOINTMENTS
         // -----------------------------
 
         var totalAppointments = await _context.Appointments
             .CountAsync(cancellationToken);
-
 
         // -----------------------------
         // TODAY'S APPOINTMENTS
@@ -61,7 +58,6 @@ public class DashboardRepository : IDashboardRepository
                 a => a.AppointmentDate.Date == today,
                 cancellationToken);
 
-
         // -----------------------------
         // MEDICINES
         // -----------------------------
@@ -69,6 +65,17 @@ public class DashboardRepository : IDashboardRepository
         var totalMedicines = await _context.Medicines
             .CountAsync(cancellationToken);
 
+        // -----------------------------
+        // LOW STOCK MEDICINES
+        // -----------------------------
+
+        var lowStockMedicines = await _context.Inventories
+            .CountAsync(
+                i =>
+                    !i.IsDeleted &&
+                    i.IsActive &&
+                    i.QuantityInStock <= i.MinimumStockLevel,
+                cancellationToken);
 
         // -----------------------------
         // BILLS
@@ -76,7 +83,6 @@ public class DashboardRepository : IDashboardRepository
 
         var totalBills = await _context.Bills
             .CountAsync(cancellationToken);
-
 
         // -----------------------------
         // PAID BILLS
@@ -87,13 +93,11 @@ public class DashboardRepository : IDashboardRepository
             .Distinct()
             .CountAsync(cancellationToken);
 
-
         // -----------------------------
         // PENDING BILLS
         // -----------------------------
 
         var pendingBills = totalBills - paidBills;
-
 
         // -----------------------------
         // TOTAL REVENUE
@@ -105,7 +109,6 @@ public class DashboardRepository : IDashboardRepository
                 cancellationToken)
             ?? 0;
 
-
         // -----------------------------
         // LABORATORY ORDERS
         // -----------------------------
@@ -113,14 +116,12 @@ public class DashboardRepository : IDashboardRepository
         var totalLaboratoryOrders = await _context.LaboratoryOrders
             .CountAsync(cancellationToken);
 
-
         // -----------------------------
         // PRESCRIPTIONS
         // -----------------------------
 
         var totalPrescriptions = await _context.Prescriptions
             .CountAsync(cancellationToken);
-
 
         // -----------------------------
         // RESULT
@@ -139,6 +140,8 @@ public class DashboardRepository : IDashboardRepository
             TodayAppointments = todayAppointments,
 
             TotalMedicines = totalMedicines,
+
+            LowStockMedicines = lowStockMedicines,
 
             PendingBills = pendingBills,
 
