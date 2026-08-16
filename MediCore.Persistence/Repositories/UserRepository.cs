@@ -28,7 +28,6 @@ public class UserRepository : IUserRepository
         CancellationToken cancellationToken)
     {
         return await _context.Users
-            .AsNoTracking()
             .Include(u => u.Role)
             .FirstOrDefaultAsync(
                 u => u.Id == id && !u.IsDeleted,
