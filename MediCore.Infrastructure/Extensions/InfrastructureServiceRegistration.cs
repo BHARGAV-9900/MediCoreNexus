@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
@@ -76,12 +77,13 @@ public static class InfrastructureServiceRegistration
                         ClockSkew = TimeSpan.Zero
                     };
 
+
+                // =====================================================
+                // JWT EVENTS
+                // =====================================================
+
                 options.Events = new JwtBearerEvents
                 {
-                    // =================================================
-                    // JWT Authentication Failed
-                    // =================================================
-
                     OnAuthenticationFailed = context =>
                     {
                         Console.WriteLine(
@@ -99,39 +101,59 @@ public static class InfrastructureServiceRegistration
                         return Task.CompletedTask;
                     },
 
+
                     // =================================================
-                    // Check Current User Status
+                    // IMPORTANT:
+                    //
+                    // Check the user's CURRENT database status
+                    // whenever an existing JWT is presented.
+                    //
+                    // This prevents a deactivated user from
+                    // continuing to use an already-issued JWT.
                     // =================================================
 
                     OnTokenValidated = async context =>
                     {
                         try
                         {
-                            var userIdClaim = context.Principal?
-                                .FindFirst(
-                                    ClaimTypes.NameIdentifier)?
-                                .Value;
-
-                            if (!int.TryParse(
-                                    userIdClaim,
-                                    out var userId))
-                            {
-                                context.Fail(
-                                    "Invalid user identity.");
-
-                                return;
-                            }
-
                             var userRepository =
                                 context.HttpContext
                                     .RequestServices
                                     .GetRequiredService<IUserRepository>();
 
+
+                            // -----------------------------------------
+                            // Get email from JWT
+                            // -----------------------------------------
+
+                            var email =
+                                context.Principal?
+                                    .FindFirst(ClaimTypes.Email)
+                                    ?.Value
+                                ??
+                                context.Principal?
+                                    .FindFirst(JwtRegisteredClaimNames.Email)
+                                    ?.Value;
+
+
+                            if (string.IsNullOrWhiteSpace(email))
+                            {
+                                context.Fail(
+                                    "User identity could not be determined.");
+
+                                return;
+                            }
+
+
+                            // -----------------------------------------
+                            // Get CURRENT user from database
+                            // -----------------------------------------
+
                             var user =
-                                await userRepository.GetByIdAsync(
-                                    userId,
-                                    context.HttpContext
-                                        .RequestAborted);
+                                await userRepository.GetByEmailAsync(
+                                    email,
+                                    context.HttpContext.RequestAborted);
+
 
                             // -----------------------------------------
                             // User does not exist
@@ -140,10 +162,11 @@ public static class InfrastructureServiceRegistration
                             if (user is null)
                             {
                                 context.Fail(
-                                    "User account not found.");
+                                    "User account was not found.");
 
                                 return;
                             }
+
 
                             // -----------------------------------------
                             // User is inactive
@@ -157,33 +180,23 @@ public static class InfrastructureServiceRegistration
                                 return;
                             }
 
-                            // -----------------------------------------
-                            // User is deleted
-                            // -----------------------------------------
 
-                            if (user.IsDeleted)
-                            {
-                                context.Fail(
-                                    "User account has been deleted.");
-
-                                return;
-                            }
+                            // -----------------------------------------
+                            // User is soft deleted
+                            //
+                            // GetByEmailAsync already excludes
+                            // IsDeleted users, so null above handles it.
+                            // -----------------------------------------
                         }
-                        catch (Exception ex)
+                        catch (Exception exception)
                         {
                             Console.WriteLine(
-                                "==================================");
+                                "JWT USER STATUS CHECK FAILED");
 
-                            Console.WriteLine(
-                                "USER STATUS VALIDATION FAILED");
-
-                            Console.WriteLine(ex);
-
-                            Console.WriteLine(
-                                "==================================");
+                            Console.WriteLine(exception);
 
                             context.Fail(
-                                "Unable to validate user account.");
+                                "Unable to validate user account status.");
                         }
                     }
                 };
@@ -196,19 +209,11 @@ public static class InfrastructureServiceRegistration
 
         services.AddAuthorization(options =>
         {
-            // -----------------------------------------------------
-            // Administration
-            // -----------------------------------------------------
-
             options.AddPolicy(
                 "AdminOnly",
                 policy =>
                     policy.RequireRole("Admin"));
 
-
-            // -----------------------------------------------------
-            // Patients
-            // -----------------------------------------------------
 
             options.AddPolicy(
                 "PatientManagement",
@@ -219,10 +224,6 @@ public static class InfrastructureServiceRegistration
                         "Receptionist"));
 
 
-            // -----------------------------------------------------
-            // Departments
-            // -----------------------------------------------------
-
             options.AddPolicy(
                 "DepartmentView",
                 policy =>
@@ -230,6 +231,7 @@ public static class InfrastructureServiceRegistration
                         "Admin",
                         "Doctor",
                         "Receptionist"));
+
 
             options.AddPolicy(
                 "DepartmentManagement",
@@ -239,10 +241,6 @@ public static class InfrastructureServiceRegistration
                         "Receptionist"));
 
 
-            // -----------------------------------------------------
-            // Doctors
-            // -----------------------------------------------------
-
             options.AddPolicy(
                 "DoctorView",
                 policy =>
@@ -251,16 +249,12 @@ public static class InfrastructureServiceRegistration
                         "Doctor",
                         "Receptionist"));
 
+
             options.AddPolicy(
                 "DoctorManagement",
                 policy =>
-                    policy.RequireRole(
-                        "Admin"));
+                    policy.RequireRole("Admin"));
 
-
-            // -----------------------------------------------------
-            // Appointments
-            // -----------------------------------------------------
 
             options.AddPolicy(
                 "AppointmentManagement",
@@ -271,10 +265,6 @@ public static class InfrastructureServiceRegistration
                         "Receptionist"));
 
 
-            // -----------------------------------------------------
-            // Medical Records
-            // -----------------------------------------------------
-
             options.AddPolicy(
                 "MedicalRecordManagement",
                 policy =>
@@ -282,10 +272,6 @@ public static class InfrastructureServiceRegistration
                         "Admin",
                         "Doctor"));
 
-
-            // -----------------------------------------------------
-            // Laboratory
-            // -----------------------------------------------------
 
             options.AddPolicy(
                 "LaboratoryManagement",
@@ -296,10 +282,6 @@ public static class InfrastructureServiceRegistration
                         "Lab Technician"));
 
 
-            // -----------------------------------------------------
-            // Pharmacy
-            // -----------------------------------------------------
-
             options.AddPolicy(
                 "PharmacyManagement",
                 policy =>
@@ -307,10 +289,6 @@ public static class InfrastructureServiceRegistration
                         "Admin",
                         "Pharmacist"));
 
-
-            // -----------------------------------------------------
-            // Prescriptions
-            // -----------------------------------------------------
 
             options.AddPolicy(
                 "PrescriptionManagement",
@@ -321,10 +299,6 @@ public static class InfrastructureServiceRegistration
                         "Pharmacist"));
 
 
-            // -----------------------------------------------------
-            // Inventory
-            // -----------------------------------------------------
-
             options.AddPolicy(
                 "InventoryManagement",
                 policy =>
@@ -332,10 +306,6 @@ public static class InfrastructureServiceRegistration
                         "Admin",
                         "Pharmacist"));
 
-
-            // -----------------------------------------------------
-            // Billing
-            // -----------------------------------------------------
 
             options.AddPolicy(
                 "BillingManagement",
@@ -346,10 +316,6 @@ public static class InfrastructureServiceRegistration
                         "Receptionist"));
 
 
-            // -----------------------------------------------------
-            // Payments
-            // -----------------------------------------------------
-
             options.AddPolicy(
                 "PaymentManagement",
                 policy =>
@@ -358,10 +324,6 @@ public static class InfrastructureServiceRegistration
                         "Accountant",
                         "Receptionist"));
 
-
-            // -----------------------------------------------------
-            // Notifications
-            // -----------------------------------------------------
 
             options.AddPolicy(
                 "NotificationManagement",
@@ -375,10 +337,6 @@ public static class InfrastructureServiceRegistration
                         "Accountant"));
 
 
-            // -----------------------------------------------------
-            // Reports
-            // -----------------------------------------------------
-
             options.AddPolicy(
                 "ReportsManagement",
                 policy =>
@@ -386,10 +344,6 @@ public static class InfrastructureServiceRegistration
                         "Admin",
                         "Accountant"));
 
-
-            // -----------------------------------------------------
-            // Dashboard
-            // -----------------------------------------------------
 
             options.AddPolicy(
                 "DashboardAccess",
