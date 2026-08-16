@@ -1,9 +1,12 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+
 using MediCore.Application.Interfaces.Services;
+
 using MediCore.Infrastructure.Authentication;
 using MediCore.Infrastructure.Services;
+
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 
@@ -15,7 +18,10 @@ public static class InfrastructureServiceRegistration
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        // Register Services here
+        // =========================================================
+        // Application Services
+        // =========================================================
+
         services.AddScoped<IPasswordHasherService, PasswordHasherService>();
 
         services.AddScoped<IJwtTokenService, JwtTokenService>();
@@ -26,6 +32,11 @@ public static class InfrastructureServiceRegistration
 
         services.AddScoped<ICurrentUserService, CurrentUserService>();
 
+
+        // =========================================================
+        // JWT Configuration
+        // =========================================================
+
         services.Configure<JwtSettings>(
             configuration.GetSection(JwtSettings.SectionName));
 
@@ -33,196 +44,273 @@ public static class InfrastructureServiceRegistration
             .GetSection(JwtSettings.SectionName)
             .Get<JwtSettings>()!;
 
+
+        // =========================================================
+        // Authentication
+        // =========================================================
+
         services
             .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
             {
-                options.TokenValidationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuer = true,
-                    ValidateAudience = true,
-                    ValidateLifetime = true,
-                    ValidateIssuerSigningKey = true,
+                options.TokenValidationParameters =
+                    new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
 
-                    ValidIssuer = jwtSettings.Issuer,
-                    ValidAudience = jwtSettings.Audience,
+                        ValidateAudience = true,
 
-                    IssuerSigningKey = new SymmetricSecurityKey(
-                        Encoding.UTF8.GetBytes(jwtSettings.SecretKey)),
+                        ValidateLifetime = true,
 
-                    ClockSkew = TimeSpan.Zero
-                };
+                        ValidateIssuerSigningKey = true,
+
+                        ValidIssuer = jwtSettings.Issuer,
+
+                        ValidAudience = jwtSettings.Audience,
+
+                        IssuerSigningKey =
+                            new SymmetricSecurityKey(
+                                Encoding.UTF8.GetBytes(
+                                    jwtSettings.SecretKey)),
+
+                        ClockSkew = TimeSpan.Zero
+                    };
 
                 options.Events = new JwtBearerEvents
                 {
                     OnAuthenticationFailed = context =>
                     {
-                        Console.WriteLine("==================================");
-                        Console.WriteLine("JWT AUTHENTICATION FAILED");
-                        Console.WriteLine(context.Exception);
-                        Console.WriteLine("==================================");
+                        Console.WriteLine(
+                            "==================================");
+
+                        Console.WriteLine(
+                            "JWT AUTHENTICATION FAILED");
+
+                        Console.WriteLine(
+                            context.Exception);
+
+                        Console.WriteLine(
+                            "==================================");
 
                         return Task.CompletedTask;
                     }
                 };
             });
 
+
+        // =========================================================
+        // Authorization Policies
+        // =========================================================
+
         services.AddAuthorization(options =>
         {
-            // ==========================================
-            // ADMIN
-            // ==========================================
+            // -----------------------------------------------------
+            // Administration
+            // -----------------------------------------------------
 
-            options.AddPolicy("AdminOnly", policy =>
-                policy.RequireRole("Admin"));
-
-
-            // ==========================================
-            // PATIENTS
-            // ==========================================
-
-            options.AddPolicy("PatientManagement", policy =>
-                policy.RequireRole(
-                    "Admin",
-                    "Doctor",
-                    "Receptionist"));
+            options.AddPolicy(
+                "AdminOnly",
+                policy =>
+                    policy.RequireRole("Admin"));
 
 
-            // ==========================================
-            // APPOINTMENTS
-            // ==========================================
+            // -----------------------------------------------------
+            // Patients
+            // -----------------------------------------------------
 
-            options.AddPolicy("AppointmentManagement", policy =>
-                policy.RequireRole(
-                    "Admin",
-                    "Doctor",
-                    "Receptionist"));
-
-
-            // ==========================================
-            // DOCTORS
-            // ==========================================
-
-            options.AddPolicy("DoctorView", policy =>
-                policy.RequireRole(
-                    "Admin",
-                    "Doctor",
-                    "Receptionist"));
-
-            options.AddPolicy("DoctorManagement", policy =>
-                policy.RequireRole("Admin"));
+            options.AddPolicy(
+                "PatientManagement",
+                policy =>
+                    policy.RequireRole(
+                        "Admin",
+                        "Doctor",
+                        "Receptionist"));
 
 
-            // ==========================================
-            // DEPARTMENTS
-            // ==========================================
+            // -----------------------------------------------------
+            // Departments
+            // -----------------------------------------------------
 
-            options.AddPolicy("DepartmentView", policy =>
-                policy.RequireRole(
-                    "Admin",
-                    "Receptionist"));
+            options.AddPolicy(
+                "DepartmentView",
+                policy =>
+                    policy.RequireRole(
+                        "Admin",
+                        "Doctor",
+                        "Receptionist"));
 
-            options.AddPolicy("DepartmentManagement", policy =>
-                policy.RequireRole("Admin"));
-
-
-            // ==========================================
-            // MEDICAL RECORDS
-            // ==========================================
-
-            options.AddPolicy("MedicalRecordManagement", policy =>
-                policy.RequireRole(
-                    "Admin",
-                    "Doctor"));
+            options.AddPolicy(
+                "DepartmentManagement",
+                policy =>
+                    policy.RequireRole(
+                        "Admin",
+                        "Receptionist"));
 
 
-            // ==========================================
-            // LABORATORY
-            // ==========================================
+            // -----------------------------------------------------
+            // Doctors
+            // -----------------------------------------------------
 
-            options.AddPolicy("LaboratoryManagement", policy =>
-                policy.RequireRole(
-                    "Admin",
-                    "Doctor",
-                    "Lab Technician"));
+            options.AddPolicy(
+                "DoctorView",
+                policy =>
+                    policy.RequireRole(
+                        "Admin",
+                        "Doctor",
+                        "Receptionist"));
 
-
-            // ==========================================
-            // PHARMACY
-            // ==========================================
-
-            options.AddPolicy("PharmacyManagement", policy =>
-                policy.RequireRole(
-                    "Admin",
-                    "Pharmacist"));
+            options.AddPolicy(
+                "DoctorManagement",
+                policy =>
+                    policy.RequireRole(
+                        "Admin"));
 
 
-            // ==========================================
-            // PRESCRIPTIONS
-            // ==========================================
+            // -----------------------------------------------------
+            // Appointments
+            // -----------------------------------------------------
 
-            options.AddPolicy("PrescriptionManagement", policy =>
-                policy.RequireRole(
-                    "Admin",
-                    "Doctor",
-                    "Pharmacist"));
-
-
-            // ==========================================
-            // BILLING
-            // ==========================================
-
-            options.AddPolicy("BillingManagement", policy =>
-                policy.RequireRole(
-                    "Admin",
-                    "Accountant",
-                    "Receptionist"));
+            options.AddPolicy(
+                "AppointmentManagement",
+                policy =>
+                    policy.RequireRole(
+                        "Admin",
+                        "Doctor",
+                        "Receptionist"));
 
 
-            // ==========================================
-            // PAYMENTS
-            // ==========================================
+            // -----------------------------------------------------
+            // Medical Records
+            // -----------------------------------------------------
 
-            options.AddPolicy("PaymentManagement", policy =>
-                policy.RequireRole(
-                    "Admin",
-                    "Accountant",
-                    "Receptionist"));
-
-
-            // ==========================================
-            // NOTIFICATIONS
-            // ==========================================
-
-            options.AddPolicy("NotificationManagement", policy =>
-                policy.RequireRole(
-                    "Admin",
-                    "Doctor",
-                    "Receptionist",
-                    "Lab Technician",
-                    "Pharmacist",
-                    "Accountant"));
+            options.AddPolicy(
+                "MedicalRecordManagement",
+                policy =>
+                    policy.RequireRole(
+                        "Admin",
+                        "Doctor"));
 
 
-            // ==========================================
-            // INVENTORY
-            // ==========================================
+            // -----------------------------------------------------
+            // Laboratory
+            // -----------------------------------------------------
 
-            options.AddPolicy("InventoryManagement", policy =>
-                policy.RequireRole(
-                    "Admin",
-                    "Pharmacist"));
+            options.AddPolicy(
+                "LaboratoryManagement",
+                policy =>
+                    policy.RequireRole(
+                        "Admin",
+                        "Doctor",
+                        "Lab Technician"));
 
 
-            //=============================================
-            // REPORTS
-            //============================================
+            // -----------------------------------------------------
+            // Pharmacy
+            // -----------------------------------------------------
 
-            options.AddPolicy("ReportsManagement", policy =>
-                policy.RequireRole(
-                    "Admin",
-                    "Accountant"));
-                    });
+            options.AddPolicy(
+                "PharmacyManagement",
+                policy =>
+                    policy.RequireRole(
+                        "Admin",
+                        "Pharmacist"));
+
+
+            // -----------------------------------------------------
+            // Prescriptions
+            // -----------------------------------------------------
+
+            options.AddPolicy(
+                "PrescriptionManagement",
+                policy =>
+                    policy.RequireRole(
+                        "Admin",
+                        "Doctor",
+                        "Pharmacist"));
+
+
+            // -----------------------------------------------------
+            // Inventory
+            // -----------------------------------------------------
+
+            options.AddPolicy(
+                "InventoryManagement",
+                policy =>
+                    policy.RequireRole(
+                        "Admin",
+                        "Pharmacist"));
+
+
+            // -----------------------------------------------------
+            // Billing
+            // -----------------------------------------------------
+
+            options.AddPolicy(
+                "BillingManagement",
+                policy =>
+                    policy.RequireRole(
+                        "Admin",
+                        "Accountant",
+                        "Receptionist"));
+
+
+            // -----------------------------------------------------
+            // Payments
+            // -----------------------------------------------------
+
+            options.AddPolicy(
+                "PaymentManagement",
+                policy =>
+                    policy.RequireRole(
+                        "Admin",
+                        "Accountant",
+                        "Receptionist"));
+
+
+            // -----------------------------------------------------
+            // Notifications
+            // -----------------------------------------------------
+
+            options.AddPolicy(
+                "NotificationManagement",
+                policy =>
+                    policy.RequireRole(
+                        "Admin",
+                        "Doctor",
+                        "Receptionist",
+                        "Pharmacist",
+                        "Lab Technician",
+                        "Accountant"));
+
+
+            // -----------------------------------------------------
+            // Reports
+            // -----------------------------------------------------
+
+            options.AddPolicy(
+                "ReportsManagement",
+                policy =>
+                    policy.RequireRole(
+                        "Admin",
+                        "Accountant"));
+
+
+            // -----------------------------------------------------
+            // Dashboard
+            // -----------------------------------------------------
+
+            options.AddPolicy(
+                "DashboardAccess",
+                policy =>
+                    policy.RequireRole(
+                        "Admin",
+                        "Doctor",
+                        "Receptionist",
+                        "Pharmacist",
+                        "Lab Technician",
+                        "Accountant"));
+        });
+
 
         return services;
     }
