@@ -9,6 +9,7 @@ public class Payment : BaseAuditableEntity
     {
     }
 
+
     public Payment(
         int billId,
         decimal amount,
@@ -18,8 +19,14 @@ public class Payment : BaseAuditableEntity
         SetAmount(amount);
 
         PaymentMethod = paymentMethod;
+
         PaidOn = DateTime.UtcNow;
     }
+
+
+    // =========================================================
+    // Properties
+    // =========================================================
 
     public int BillId { get; private set; }
 
@@ -29,23 +36,44 @@ public class Payment : BaseAuditableEntity
 
     public DateTime PaidOn { get; private set; }
 
+
+    // =========================================================
+    // Navigation Property
+    // =========================================================
+
     public Bill? Bill { get; private set; }
 
-    private void SetBill(int billId)
+
+    // =========================================================
+    // Validation
+    // =========================================================
+
+    private void SetBill(
+        int billId)
     {
         if (billId <= 0)
-            throw new ArgumentException("Invalid bill.");
+            throw new ArgumentException(
+                "Invalid bill.");
 
         BillId = billId;
     }
 
-    private void SetAmount(decimal amount)
+
+    private void SetAmount(
+        decimal amount)
     {
         if (amount <= 0)
-            throw new ArgumentException("Payment amount must be greater than zero.");
+            throw new ArgumentException(
+                "Payment amount must be greater than zero.");
 
         Amount = amount;
     }
+
+
+    // =========================================================
+    // Update Payment
+    // =========================================================
+
     public void Update(
         decimal amount,
         PaymentMethod paymentMethod)
@@ -56,10 +84,18 @@ public class Payment : BaseAuditableEntity
 
         UpdatedAt = DateTime.UtcNow;
     }
+
+
+    // =========================================================
+    // Soft Delete
+    // =========================================================
+
     public void Delete()
     {
         IsDeleted = true;
+
         DeletedAt = DateTime.UtcNow;
+
         UpdatedAt = DateTime.UtcNow;
     }
 }
