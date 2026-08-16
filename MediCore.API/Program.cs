@@ -120,6 +120,8 @@ app.UseCors("AngularPolicy");
 
 app.UseAuthentication();
 
+app.UseMiddleware<ActiveUserMiddleware>();
+
 app.UseAuthorization();
 
 app.MapControllers();
