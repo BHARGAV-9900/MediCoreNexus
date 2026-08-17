@@ -41,6 +41,9 @@ public class GetPatientByIdQueryHandler
             PhoneNumber = patient.PhoneNumber,
             Email = patient.Email,
             Address = patient.Address,
+            EmergencyContactName = patient.EmergencyContactName,
+            EmergencyContactPhone = patient.EmergencyContactPhone,
+            InsuranceNumber = patient.InsuranceNumber,
             IsActive = patient.IsActive
         };
     }
