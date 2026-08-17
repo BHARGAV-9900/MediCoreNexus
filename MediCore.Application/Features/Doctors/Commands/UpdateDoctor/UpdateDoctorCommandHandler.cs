@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using MediCore.Application.Exceptions;
 using MediCore.Application.Interfaces.Repositories;
 
@@ -18,8 +18,8 @@ public class UpdateDoctorCommandHandler : IRequestHandler<UpdateDoctorCommand>
     }
 
     public async Task Handle(
-    UpdateDoctorCommand request,
-    CancellationToken cancellationToken)
+        UpdateDoctorCommand request,
+        CancellationToken cancellationToken)
     {
         var doctor = await _doctorRepository.GetByIdAsync(
             request.Id,
@@ -39,6 +39,15 @@ public class UpdateDoctorCommandHandler : IRequestHandler<UpdateDoctorCommand>
         {
             throw new NotFoundException(
                 $"Department with Id {request.DepartmentId} was not found.");
+        }
+
+        if (await _doctorRepository.ExistsByEmailExceptIdAsync(
+                request.Email,
+                request.Id,
+                cancellationToken))
+        {
+            throw new ConflictException(
+                "A doctor with this email already exists.");
         }
 
         doctor.Update(
