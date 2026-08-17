@@ -1,4 +1,4 @@
-﻿using MediCore.Domain.Entities;
+using MediCore.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -79,9 +79,11 @@ public class PatientConfiguration : IEntityTypeConfiguration<Patient>
                .HasForeignKey(a => a.PatientId)
                .OnDelete(DeleteBehavior.Restrict);
 
-        // Indexes
+        // Unique email among active/non-deleted patients.
+        // Soft-deleted patients must not block reuse of the email.
         builder.HasIndex(p => p.Email)
-               .IsUnique();
+               .IsUnique()
+               .HasFilter("[IsDeleted] = 0");
 
         builder.HasIndex(p => p.PhoneNumber);
 
