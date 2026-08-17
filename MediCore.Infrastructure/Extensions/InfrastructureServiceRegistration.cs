@@ -51,156 +51,104 @@ public static class InfrastructureServiceRegistration
         // =========================================================
 
         services
-            .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-            .AddJwtBearer(options =>
+    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+
+            ValidIssuer = jwtSettings.Issuer,
+            ValidAudience = jwtSettings.Audience,
+
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(jwtSettings.SecretKey)),
+
+            ClockSkew = TimeSpan.Zero
+        };
+
+        options.Events = new JwtBearerEvents
+        {
+            OnTokenValidated = async context =>
             {
-                options.TokenValidationParameters =
-                    new TokenValidationParameters
-                    {
-                        ValidateIssuer = true,
+                // -------------------------------------------------
+                // JWT is valid.
+                // Now verify that the user is STILL active
+                // in the database.
+                // -------------------------------------------------
 
-                        ValidateAudience = true,
+                var userIdClaim =
+                    context.Principal?
+                        .FindFirst(ClaimTypes.NameIdentifier)?
+                        .Value;
 
-                        ValidateLifetime = true,
-
-                        ValidateIssuerSigningKey = true,
-
-                        ValidIssuer = jwtSettings.Issuer,
-
-                        ValidAudience = jwtSettings.Audience,
-
-                        IssuerSigningKey =
-                            new SymmetricSecurityKey(
-                                Encoding.UTF8.GetBytes(
-                                    jwtSettings.SecretKey)),
-
-                        ClockSkew = TimeSpan.Zero
-                    };
-
-
-                // =====================================================
-                // JWT EVENTS
-                // =====================================================
-
-                options.Events = new JwtBearerEvents
+                if (!int.TryParse(userIdClaim, out var userId))
                 {
-                    OnAuthenticationFailed = context =>
-                    {
-                        Console.WriteLine(
-                            "==================================");
+                    context.Fail("Invalid user identity.");
+                    return;
+                }
 
-                        Console.WriteLine(
-                            "JWT AUTHENTICATION FAILED");
+                // Get IUserRepository from DI
+                var userRepository =
+                    context.HttpContext.RequestServices
+                        .GetRequiredService<IUserRepository>();
 
-                        Console.WriteLine(
-                            context.Exception);
+                // Read CURRENT database state
+                var user =
+                    await userRepository.GetByIdAsync(
+                        userId,
+                        context.HttpContext.RequestAborted);
 
-                        Console.WriteLine(
-                            "==================================");
+                // -------------------------------------------------
+                // User does not exist or has been deleted
+                // -------------------------------------------------
 
-                        return Task.CompletedTask;
-                    },
+                if (user is null || user.IsDeleted)
+                {
+                    context.Fail(
+                        "User account is no longer available.");
 
+                    return;
+                }
 
-                    // =================================================
-                    // IMPORTANT:
-                    //
-                    // Check the user's CURRENT database status
-                    // whenever an existing JWT is presented.
-                    //
-                    // This prevents a deactivated user from
-                    // continuing to use an already-issued JWT.
-                    // =================================================
+                // -------------------------------------------------
+                // User has been deactivated AFTER JWT was issued
+                // -------------------------------------------------
 
-                    OnTokenValidated = async context =>
-                    {
-                        try
-                        {
-                            var userRepository =
-                                context.HttpContext
-                                    .RequestServices
-                                    .GetRequiredService<IUserRepository>();
+                if (!user.IsActive)
+                {
+                    context.Fail(
+                        "User account is inactive.");
 
+                    return;
+                }
 
-                            // -----------------------------------------
-                            // Get email from JWT
-                            // -----------------------------------------
+                // -------------------------------------------------
+                // User is active → authentication succeeds
+                // -------------------------------------------------
+            },
 
-                            var email =
-                                context.Principal?
-                                    .FindFirst(ClaimTypes.Email)
-                                    ?.Value
-                                ??
-                                context.Principal?
-                                    .FindFirst(JwtRegisteredClaimNames.Email)
-                                    ?.Value;
+            OnAuthenticationFailed = context =>
+            {
+                Console.WriteLine(
+                    "==================================");
 
+                Console.WriteLine(
+                    "JWT AUTHENTICATION FAILED");
 
-                            if (string.IsNullOrWhiteSpace(email))
-                            {
-                                context.Fail(
-                                    "User identity could not be determined.");
+                Console.WriteLine(
+                    context.Exception.Message);
 
-                                return;
-                            }
+                Console.WriteLine(
+                    "==================================");
 
-
-                            // -----------------------------------------
-                            // Get CURRENT user from database
-                            // -----------------------------------------
-
-                            var user =
-                                await userRepository.GetByEmailAsync(
-                                    email,
-                                    context.HttpContext.RequestAborted);
-
-
-                            // -----------------------------------------
-                            // User does not exist
-                            // -----------------------------------------
-
-                            if (user is null)
-                            {
-                                context.Fail(
-                                    "User account was not found.");
-
-                                return;
-                            }
-
-
-                            // -----------------------------------------
-                            // User is inactive
-                            // -----------------------------------------
-
-                            if (!user.IsActive)
-                            {
-                                context.Fail(
-                                    "User account is inactive.");
-
-                                return;
-                            }
-
-
-                            // -----------------------------------------
-                            // User is soft deleted
-                            //
-                            // GetByEmailAsync already excludes
-                            // IsDeleted users, so null above handles it.
-                            // -----------------------------------------
-                        }
-                        catch (Exception exception)
-                        {
-                            Console.WriteLine(
-                                "JWT USER STATUS CHECK FAILED");
-
-                            Console.WriteLine(exception);
-
-                            context.Fail(
-                                "Unable to validate user account status.");
-                        }
-                    }
-                };
-            });
+                return Task.CompletedTask;
+            }
+        };
+    });
 
 
         // =========================================================
