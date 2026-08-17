@@ -24,7 +24,8 @@ public class UpdatePatientCommandValidator
 
         RuleFor(x => x.PhoneNumber)
             .NotEmpty()
-            .MaximumLength(15);
+            .Matches("^\\d{10,15}$")
+            .WithMessage("Phone number must contain 10 to 15 digits.");
 
         RuleFor(x => x.Email)
             .NotEmpty()
@@ -40,6 +41,7 @@ public class UpdatePatientCommandValidator
 
         RuleFor(x => x.EmergencyContactPhone)
             .NotEmpty()
-            .MaximumLength(15);
+            .Matches("^\\d{10,15}$")
+            .WithMessage("Emergency contact phone must contain 10 to 15 digits.");
     }
 }
