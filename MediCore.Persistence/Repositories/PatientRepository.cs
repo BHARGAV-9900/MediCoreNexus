@@ -43,6 +43,7 @@ public class PatientRepository : IPatientRepository
             .ThenBy(p => p.LastName)
             .ToListAsync(cancellationToken);
     }
+
     public async Task<(IEnumerable<Patient> Patients, int TotalCount)> GetPagedAsync(
         GetPagedPatientsQuery request,
         CancellationToken cancellationToken)
@@ -74,17 +75,11 @@ public class PatientRepository : IPatientRepository
                  request.Filter.SortDirection?.ToLower()) switch
         {
             ("firstname", "desc") => query.OrderByDescending(x => x.FirstName),
-
             ("firstname", _) => query.OrderBy(x => x.FirstName),
-
             ("lastname", "desc") => query.OrderByDescending(x => x.LastName),
-
             ("lastname", _) => query.OrderBy(x => x.LastName),
-
             ("createdat", "desc") => query.OrderByDescending(x => x.CreatedAt),
-
             ("createdat", _) => query.OrderBy(x => x.CreatedAt),
-
             _ => query.OrderBy(x => x.FirstName)
         };
 
@@ -97,13 +92,28 @@ public class PatientRepository : IPatientRepository
 
         return (patients, totalCount);
     }
+
     public async Task<bool> ExistsByEmailAsync(
         string email,
         CancellationToken cancellationToken)
     {
+        var normalizedEmail = email.Trim().ToLower();
+
         return await _context.Patients
             .AnyAsync(
-                p => p.Email == email && !p.IsDeleted,
+                p => p.Email.ToLower() == normalizedEmail && !p.IsDeleted,
+                cancellationToken);
+    }
+
+    public async Task<bool> ExistsByPhoneNumberAsync(
+        string phoneNumber,
+        CancellationToken cancellationToken)
+    {
+        var normalizedPhoneNumber = phoneNumber.Trim();
+
+        return await _context.Patients
+            .AnyAsync(
+                p => p.PhoneNumber == normalizedPhoneNumber && !p.IsDeleted,
                 cancellationToken);
     }
 
