@@ -1,8 +1,7 @@
-﻿using MediCore.Application.Interfaces.Repositories;
+using MediCore.Application.Interfaces.Repositories;
 using MediCore.Domain.Entities;
 using MediCore.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
-using System.Threading;
 
 namespace MediCore.Persistence.Repositories;
 
@@ -16,15 +15,15 @@ public class DoctorRepository : IDoctorRepository
     }
 
     public async Task AddAsync(
-            Doctor doctor,
-            CancellationToken cancellationToken)
+        Doctor doctor,
+        CancellationToken cancellationToken)
     {
         await _context.Doctors.AddAsync(doctor, cancellationToken);
     }
 
     public async Task<Doctor?> GetByIdAsync(
-            int id,
-            CancellationToken cancellationToken)
+        int id,
+        CancellationToken cancellationToken)
     {
         return await _context.Doctors
             .Include(d => d.Department)
@@ -34,7 +33,7 @@ public class DoctorRepository : IDoctorRepository
     }
 
     public async Task<IEnumerable<Doctor>> GetAllAsync(
-    CancellationToken cancellationToken)
+        CancellationToken cancellationToken)
     {
         return await _context.Doctors
             .Include(d => d.Department)
@@ -43,8 +42,8 @@ public class DoctorRepository : IDoctorRepository
     }
 
     public async Task<bool> ExistsByEmailAsync(
-            string email,
-            CancellationToken cancellationToken)
+        string email,
+        CancellationToken cancellationToken)
     {
         return await _context.Doctors
             .AnyAsync(
@@ -52,8 +51,21 @@ public class DoctorRepository : IDoctorRepository
                 cancellationToken);
     }
 
+    public async Task<bool> ExistsByEmailExceptIdAsync(
+        string email,
+        int doctorId,
+        CancellationToken cancellationToken)
+    {
+        return await _context.Doctors
+            .AnyAsync(
+                d => d.Email == email
+                    && d.Id != doctorId
+                    && !d.IsDeleted,
+                cancellationToken);
+    }
+
     public async Task SaveChangesAsync(
-            CancellationToken cancellationToken)
+        CancellationToken cancellationToken)
     {
         await _context.SaveChangesAsync(cancellationToken);
     }
