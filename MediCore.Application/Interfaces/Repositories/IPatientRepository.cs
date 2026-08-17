@@ -15,12 +15,17 @@ public interface IPatientRepository
 
     Task<IEnumerable<Patient>> GetAllAsync(
         CancellationToken cancellationToken);
+
     Task<(IEnumerable<Patient> Patients, int TotalCount)> GetPagedAsync(
         GetPagedPatientsQuery request,
         CancellationToken cancellationToken);
 
     Task<bool> ExistsByEmailAsync(
         string email,
+        CancellationToken cancellationToken);
+
+    Task<bool> ExistsByPhoneNumberAsync(
+        string phoneNumber,
         CancellationToken cancellationToken);
 
     Task SaveChangesAsync(
