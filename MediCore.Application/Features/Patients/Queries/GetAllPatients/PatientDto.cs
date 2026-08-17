@@ -20,5 +20,11 @@ public class PatientDto
 
     public string Address { get; set; } = string.Empty;
 
+    public string EmergencyContactName { get; set; } = string.Empty;
+
+    public string EmergencyContactPhone { get; set; } = string.Empty;
+
+    public string InsuranceNumber { get; set; } = string.Empty;
+
     public bool IsActive { get; set; }
 }
