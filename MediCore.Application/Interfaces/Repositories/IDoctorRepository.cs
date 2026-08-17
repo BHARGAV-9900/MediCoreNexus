@@ -1,12 +1,12 @@
-﻿using MediCore.Domain.Entities;
+using MediCore.Domain.Entities;
 
 namespace MediCore.Application.Interfaces.Repositories;
 
 public interface IDoctorRepository
 {
     Task AddAsync(
-    Doctor doctor,
-    CancellationToken cancellationToken);
+        Doctor doctor,
+        CancellationToken cancellationToken);
 
     Task<Doctor?> GetByIdAsync(
         int id,
@@ -17,6 +17,11 @@ public interface IDoctorRepository
 
     Task<bool> ExistsByEmailAsync(
         string email,
+        CancellationToken cancellationToken);
+
+    Task<bool> ExistsByEmailExceptIdAsync(
+        string email,
+        int doctorId,
         CancellationToken cancellationToken);
 
     Task SaveChangesAsync(
