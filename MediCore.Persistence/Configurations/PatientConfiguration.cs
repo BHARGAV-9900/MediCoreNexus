@@ -85,7 +85,11 @@ public class PatientConfiguration : IEntityTypeConfiguration<Patient>
                .IsUnique()
                .HasFilter("[IsDeleted] = 0");
 
-        builder.HasIndex(p => p.PhoneNumber);
+        // Unique phone number among active/non-deleted patients.
+        // Soft-deleted patients must not block reuse of the phone number.
+        builder.HasIndex(p => p.PhoneNumber)
+               .IsUnique()
+               .HasFilter("[IsDeleted] = 0");
 
         builder.HasIndex(p => p.LastName);
 
