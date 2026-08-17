@@ -29,16 +29,30 @@ public class UpdatePatientCommandHandler
                 $"Patient with Id {request.Id} was not found.");
         }
 
-        var duplicatePatient = (await _patientRepository.GetAllAsync(
-            cancellationToken))
-            .FirstOrDefault(p =>
-                p.Email.ToLower() == request.Email.ToLower()
-                && p.Id != request.Id);
+        var patients = await _patientRepository.GetAllAsync(
+            cancellationToken);
 
-        if (duplicatePatient is not null)
+        var normalizedEmail = request.Email.Trim().ToLower();
+        var normalizedPhoneNumber = request.PhoneNumber.Trim();
+
+        var duplicateEmail = patients.FirstOrDefault(p =>
+            p.Email.ToLower() == normalizedEmail
+            && p.Id != request.Id);
+
+        if (duplicateEmail is not null)
         {
             throw new ConflictException(
                 "A patient with this email already exists.");
+        }
+
+        var duplicatePhoneNumber = patients.FirstOrDefault(p =>
+            p.PhoneNumber == normalizedPhoneNumber
+            && p.Id != request.Id);
+
+        if (duplicatePhoneNumber is not null)
+        {
+            throw new ConflictException(
+                "A patient with this phone number already exists.");
         }
 
         patient.Update(
@@ -47,8 +61,8 @@ public class UpdatePatientCommandHandler
             request.DateOfBirth,
             request.Gender,
             request.BloodGroup,
-            request.PhoneNumber,
-            request.Email,
+            normalizedPhoneNumber,
+            normalizedEmail,
             request.Address,
             request.EmergencyContactName,
             request.EmergencyContactPhone,
