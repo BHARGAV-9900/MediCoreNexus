@@ -20,14 +20,24 @@ public class CreatePatientCommandHandler
         CreatePatientCommand request,
         CancellationToken cancellationToken)
     {
-        var exists = await _patientRepository.ExistsByEmailAsync(
+        var emailExists = await _patientRepository.ExistsByEmailAsync(
             request.Email,
             cancellationToken);
 
-        if (exists)
+        if (emailExists)
         {
             throw new ConflictException(
                 "A patient with this email already exists.");
+        }
+
+        var phoneExists = await _patientRepository.ExistsByPhoneNumberAsync(
+            request.PhoneNumber,
+            cancellationToken);
+
+        if (phoneExists)
+        {
+            throw new ConflictException(
+                "A patient with this phone number already exists.");
         }
 
         var patient = new Patient(
