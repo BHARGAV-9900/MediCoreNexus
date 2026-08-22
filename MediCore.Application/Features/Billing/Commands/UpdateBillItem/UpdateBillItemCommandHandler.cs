@@ -27,18 +27,21 @@ public class UpdateBillItemCommandHandler : IRequestHandler<UpdateBillItemComman
         if (bill is null)
             throw new NotFoundException($"Bill with Id {item.BillId} was not found.");
 
-        item.Update(request.Description, request.Quantity, request.UnitPrice);
-        await _billItemRepository.SaveChangesAsync(cancellationToken);
-
         var items = await _billItemRepository.GetByBillIdAsync(item.BillId, cancellationToken);
-        var total = items.Sum(x => x.TotalAmount);
+        var otherItemsTotal = items
+            .Where(x => x.Id != item.Id)
+            .Sum(x => x.TotalAmount);
+        var newTotal = otherItemsTotal + (request.Quantity * request.UnitPrice);
         var totalPaid = bill.Payments.Where(x => !x.IsDeleted).Sum(x => x.Amount);
 
-        if (total < totalPaid)
+        if (newTotal < totalPaid)
             throw new ConflictException(
                 $"Bill total cannot be less than the amount already paid. Amount paid: {totalPaid:0.00}.");
 
-        bill.Update(total);
+        item.Update(request.Description, request.Quantity, request.UnitPrice);
+        await _billItemRepository.SaveChangesAsync(cancellationToken);
+
+        bill.Update(newTotal);
         bill.UpdatePaymentStatus(totalPaid);
         await _billRepository.SaveChangesAsync(cancellationToken);
 
