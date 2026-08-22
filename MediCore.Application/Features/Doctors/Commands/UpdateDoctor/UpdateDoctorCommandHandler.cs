@@ -41,8 +41,11 @@ public class UpdateDoctorCommandHandler : IRequestHandler<UpdateDoctorCommand>
                 $"Department with Id {request.DepartmentId} was not found.");
         }
 
+        var normalizedEmail = request.Email.Trim().ToLower();
+        var normalizedPhoneNumber = request.PhoneNumber.Trim();
+
         if (await _doctorRepository.ExistsByEmailExceptIdAsync(
-                request.Email,
+                normalizedEmail,
                 request.Id,
                 cancellationToken))
         {
@@ -50,11 +53,20 @@ public class UpdateDoctorCommandHandler : IRequestHandler<UpdateDoctorCommand>
                 "A doctor with this email already exists.");
         }
 
+        if (await _doctorRepository.ExistsByPhoneNumberExceptIdAsync(
+                normalizedPhoneNumber,
+                request.Id,
+                cancellationToken))
+        {
+            throw new ConflictException(
+                "A doctor with this phone number already exists.");
+        }
+
         doctor.Update(
             request.FirstName,
             request.LastName,
-            request.Email,
-            request.PhoneNumber,
+            normalizedEmail,
+            normalizedPhoneNumber,
             request.Specialization,
             request.ExperienceYears,
             request.ConsultationFee,
