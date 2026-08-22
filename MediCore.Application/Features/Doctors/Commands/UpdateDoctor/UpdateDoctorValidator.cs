@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+using System.Text.RegularExpressions;
 
 namespace MediCore.Application.Features.Doctors.Commands.UpdateDoctor;
 
@@ -24,7 +25,8 @@ public class UpdateDoctorValidator : AbstractValidator<UpdateDoctorCommand>
 
         RuleFor(x => x.PhoneNumber)
             .NotEmpty()
-            .MaximumLength(20);
+            .Must(BeValidInternationalPhoneNumber)
+            .WithMessage("Phone number must be in international format, for example +919876543210 or +14155552671.");
 
         RuleFor(x => x.Specialization)
             .NotEmpty()
@@ -38,5 +40,17 @@ public class UpdateDoctorValidator : AbstractValidator<UpdateDoctorCommand>
 
         RuleFor(x => x.DepartmentId)
             .GreaterThan(0);
+    }
+
+    private static bool BeValidInternationalPhoneNumber(string phoneNumber)
+    {
+        if (string.IsNullOrWhiteSpace(phoneNumber))
+        {
+            return false;
+        }
+
+        var normalized = phoneNumber.Trim();
+
+        return Regex.IsMatch(normalized, @"^\+\d{8,15}$");
     }
 }
