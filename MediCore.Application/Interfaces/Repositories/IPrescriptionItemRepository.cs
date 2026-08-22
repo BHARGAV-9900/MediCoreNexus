@@ -1,4 +1,4 @@
-﻿using MediCore.Domain.Entities;
+using MediCore.Domain.Entities;
 
 namespace MediCore.Application.Interfaces.Repositories;
 
@@ -22,7 +22,8 @@ public interface IPrescriptionItemRepository
     Task<bool> ExistsAsync(
         int prescriptionId,
         int medicineId,
-        CancellationToken cancellationToken);
+        CancellationToken cancellationToken,
+        int? excludeId = null);
 
     Task SaveChangesAsync(
         CancellationToken cancellationToken);
