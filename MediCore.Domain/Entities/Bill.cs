@@ -1,4 +1,4 @@
-﻿using MediCore.Domain.Common;
+using MediCore.Domain.Common;
 
 namespace MediCore.Domain.Entities;
 
@@ -8,42 +8,26 @@ public class Bill : BaseAuditableEntity
     {
     }
 
-
     public Bill(
         int appointmentId,
         decimal totalAmount)
     {
         SetAppointment(appointmentId);
         SetTotalAmount(totalAmount);
-
         IsPaid = false;
     }
 
-
-    // =========================================================
-    // Properties
-    // =========================================================
-
     public int AppointmentId { get; private set; }
-
     public decimal TotalAmount { get; private set; }
-
     public bool IsPaid { get; private set; }
-
-
-    // =========================================================
-    // Navigation Properties
-    // =========================================================
 
     public Appointment? Appointment { get; private set; }
 
+    public ICollection<BillItem> BillItems { get; private set; }
+        = new List<BillItem>();
+
     public ICollection<Payment> Payments { get; private set; }
         = new List<Payment>();
-
-
-    // =========================================================
-    // Payment Status
-    // =========================================================
 
     public void MarkAsPaid()
     {
@@ -51,10 +35,8 @@ public class Bill : BaseAuditableEntity
             return;
 
         IsPaid = true;
-
         UpdatedAt = DateTime.UtcNow;
     }
-
 
     public void MarkAsUnpaid()
     {
@@ -62,74 +44,43 @@ public class Bill : BaseAuditableEntity
             return;
 
         IsPaid = false;
-
         UpdatedAt = DateTime.UtcNow;
     }
 
-
-    public void UpdatePaymentStatus(
-        decimal totalPaid)
+    public void UpdatePaymentStatus(decimal totalPaid)
     {
         if (totalPaid >= TotalAmount)
-        {
             MarkAsPaid();
-        }
         else
-        {
             MarkAsUnpaid();
-        }
     }
 
-
-    // =========================================================
-    // Validation
-    // =========================================================
-
-    private void SetAppointment(
-        int appointmentId)
+    private void SetAppointment(int appointmentId)
     {
         if (appointmentId <= 0)
-            throw new ArgumentException(
-                "Invalid appointment.");
+            throw new ArgumentException("Invalid appointment.");
 
         AppointmentId = appointmentId;
     }
 
-
-    private void SetTotalAmount(
-        decimal totalAmount)
+    private void SetTotalAmount(decimal totalAmount)
     {
         if (totalAmount <= 0)
-            throw new ArgumentException(
-                "Total amount must be greater than zero.");
+            throw new ArgumentException("Total amount must be greater than zero.");
 
         TotalAmount = totalAmount;
     }
 
-
-    // =========================================================
-    // Update Bill
-    // =========================================================
-
-    public void Update(
-        decimal totalAmount)
+    public void Update(decimal totalAmount)
     {
         SetTotalAmount(totalAmount);
-
         UpdatedAt = DateTime.UtcNow;
     }
-
-
-    // =========================================================
-    // Soft Delete
-    // =========================================================
 
     public void Delete()
     {
         IsDeleted = true;
-
         DeletedAt = DateTime.UtcNow;
-
         UpdatedAt = DateTime.UtcNow;
     }
 }
