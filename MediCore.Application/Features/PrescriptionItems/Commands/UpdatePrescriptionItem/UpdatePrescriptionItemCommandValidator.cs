@@ -1,4 +1,4 @@
-﻿using FluentValidation;
+using FluentValidation;
 
 namespace MediCore.Application.Features.PrescriptionItems.Commands.UpdatePrescriptionItem;
 
@@ -8,6 +8,12 @@ public class UpdatePrescriptionItemCommandValidator
     public UpdatePrescriptionItemCommandValidator()
     {
         RuleFor(x => x.Id)
+            .GreaterThan(0);
+
+        RuleFor(x => x.PrescriptionId)
+            .GreaterThan(0);
+
+        RuleFor(x => x.MedicineId)
             .GreaterThan(0);
 
         RuleFor(x => x.Dosage)
