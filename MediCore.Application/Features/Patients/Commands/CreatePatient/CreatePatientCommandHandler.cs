@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using MediCore.Application.Exceptions;
 using MediCore.Application.Interfaces.Repositories;
 using MediCore.Domain.Entities;
@@ -20,16 +20,21 @@ public class CreatePatientCommandHandler
         CreatePatientCommand request,
         CancellationToken cancellationToken)
     {
+        // Normalize values before duplicate checks and persistence.
+        var normalizedEmail = request.Email.Trim().ToLowerInvariant();
+        var normalizedPhoneNumber = request.PhoneNumber.Trim();
+        var normalizedEmergencyPhone = request.EmergencyContactPhone.Trim();
+
         // ---------------------------------------------------------
         // Check duplicate email and phone number
         // ---------------------------------------------------------
 
         var emailExists = await _patientRepository.ExistsByEmailAsync(
-            request.Email,
+            normalizedEmail,
             cancellationToken);
 
         var phoneExists = await _patientRepository.ExistsByPhoneNumberAsync(
-            request.PhoneNumber,
+            normalizedPhoneNumber,
             cancellationToken);
 
         // Both email and phone already exist
@@ -63,11 +68,11 @@ public class CreatePatientCommandHandler
             request.DateOfBirth,
             request.Gender,
             request.BloodGroup,
-            request.PhoneNumber,
-            request.Email,
+            normalizedPhoneNumber,
+            normalizedEmail,
             request.Address,
             request.EmergencyContactName,
-            request.EmergencyContactPhone,
+            normalizedEmergencyPhone,
             request.InsuranceNumber);
 
         await _patientRepository.AddAsync(
