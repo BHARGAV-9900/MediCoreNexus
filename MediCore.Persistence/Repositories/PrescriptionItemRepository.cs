@@ -1,4 +1,4 @@
-﻿using MediCore.Application.Interfaces.Repositories;
+using MediCore.Application.Interfaces.Repositories;
 using MediCore.Domain.Entities;
 using MediCore.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
@@ -62,13 +62,15 @@ public class PrescriptionItemRepository : IPrescriptionItemRepository
     public async Task<bool> ExistsAsync(
         int prescriptionId,
         int medicineId,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        int? excludeId = null)
     {
         return await _context.PrescriptionItems
             .AnyAsync(pi =>
                 pi.PrescriptionId == prescriptionId &&
                 pi.MedicineId == medicineId &&
-                !pi.IsDeleted,
+                !pi.IsDeleted &&
+                (!excludeId.HasValue || pi.Id != excludeId.Value),
                 cancellationToken);
     }
 
