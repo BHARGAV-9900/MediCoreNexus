@@ -1,4 +1,4 @@
-﻿using FluentValidation;
+using FluentValidation;
 
 namespace MediCore.Application.Features.Patients.Commands.UpdatePatient;
 
@@ -22,10 +22,12 @@ public class UpdatePatientCommandValidator
             .LessThan(DateTime.Today)
             .WithMessage("Date of birth must be in the past.");
 
+        // Phone numbers are stored in international E.164-style format.
+        // Example: +919999999999 or +14155552671
         RuleFor(x => x.PhoneNumber)
             .NotEmpty()
-            .Matches("^\\d{10,15}$")
-            .WithMessage("Phone number must contain 10 to 15 digits.");
+            .Matches("^\\+[1-9]\\d{7,14}$")
+            .WithMessage("Phone number must include a country code and contain 8 to 15 digits after the + sign.");
 
         RuleFor(x => x.Email)
             .NotEmpty()
@@ -41,7 +43,7 @@ public class UpdatePatientCommandValidator
 
         RuleFor(x => x.EmergencyContactPhone)
             .NotEmpty()
-            .Matches("^\\d{10,15}$")
-            .WithMessage("Emergency contact phone must contain 10 to 15 digits.");
+            .Matches("^\\+[1-9]\\d{7,14}$")
+            .WithMessage("Emergency contact phone must include a country code and contain 8 to 15 digits after the + sign.");
     }
 }
