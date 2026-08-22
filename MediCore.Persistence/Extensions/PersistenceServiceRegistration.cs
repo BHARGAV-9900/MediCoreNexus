@@ -12,8 +12,6 @@ public static class PersistenceServiceRegistration
     public static IServiceCollection AddPersistenceServices(
         this IServiceCollection services,
         IConfiguration configuration)
-
-    
     {
         services.AddDbContext<ApplicationDbContext>(options =>
             options.UseSqlServer(
@@ -31,6 +29,7 @@ public static class PersistenceServiceRegistration
         services.AddScoped<IPrescriptionRepository, PrescriptionRepository>();
         services.AddScoped<IPrescriptionItemRepository, PrescriptionItemRepository>();
         services.AddScoped<IBillRepository, BillRepository>();
+        services.AddScoped<IBillItemRepository, BillItemRepository>();
         services.AddScoped<IPaymentRepository, PaymentRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IRoleRepository, RoleRepository>();
@@ -43,5 +42,4 @@ public static class PersistenceServiceRegistration
 
         return services;
     }
-    
 }
