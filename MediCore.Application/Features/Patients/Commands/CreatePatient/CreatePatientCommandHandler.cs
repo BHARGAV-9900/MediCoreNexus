@@ -20,25 +20,42 @@ public class CreatePatientCommandHandler
         CreatePatientCommand request,
         CancellationToken cancellationToken)
     {
+        // ---------------------------------------------------------
+        // Check duplicate email and phone number
+        // ---------------------------------------------------------
+
         var emailExists = await _patientRepository.ExistsByEmailAsync(
             request.Email,
             cancellationToken);
 
+        var phoneExists = await _patientRepository.ExistsByPhoneNumberAsync(
+            request.PhoneNumber,
+            cancellationToken);
+
+        // Both email and phone already exist
+        if (emailExists && phoneExists)
+        {
+            throw new ConflictException(
+                "A patient with this email and phone number already exists.");
+        }
+
+        // Only email already exists
         if (emailExists)
         {
             throw new ConflictException(
                 "A patient with this email already exists.");
         }
 
-        var phoneExists = await _patientRepository.ExistsByPhoneNumberAsync(
-            request.PhoneNumber,
-            cancellationToken);
-
+        // Only phone number already exists
         if (phoneExists)
         {
             throw new ConflictException(
                 "A patient with this phone number already exists.");
         }
+
+        // ---------------------------------------------------------
+        // Create patient
+        // ---------------------------------------------------------
 
         var patient = new Patient(
             request.FirstName,
