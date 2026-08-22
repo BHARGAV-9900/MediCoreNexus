@@ -27,21 +27,24 @@ public class DeleteBillItemCommandHandler : IRequestHandler<DeleteBillItemComman
         if (bill is null)
             throw new NotFoundException($"Bill with Id {item.BillId} was not found.");
 
+        var items = (await _billItemRepository.GetByBillIdAsync(item.BillId, cancellationToken)).ToList();
+        if (items.Count == 1)
+            throw new ConflictException("A bill must contain at least one active bill item.");
+
+        var remainingTotal = items
+            .Where(x => x.Id != item.Id)
+            .Sum(x => x.TotalAmount);
+
+        var totalPaid = bill.Payments.Where(x => !x.IsDeleted).Sum(x => x.Amount);
+
+        if (remainingTotal < totalPaid)
+            throw new ConflictException(
+                $"This item cannot be deleted because the remaining bill total would be less than the amount already paid. Amount paid: {totalPaid:0.00}.");
+
         item.Delete();
         await _billItemRepository.SaveChangesAsync(cancellationToken);
 
-        var items = await _billItemRepository.GetByBillIdAsync(item.BillId, cancellationToken);
-        var total = items.Sum(x => x.TotalAmount);
-        var totalPaid = bill.Payments.Where(x => !x.IsDeleted).Sum(x => x.Amount);
-
-        if (total <= 0)
-            throw new ConflictException("A bill must contain at least one active bill item.");
-
-        if (total < totalPaid)
-            throw new ConflictException(
-                $"Bill total cannot be less than the amount already paid. Amount paid: {totalPaid:0.00}.");
-
-        bill.Update(total);
+        bill.Update(remainingTotal);
         bill.UpdatePaymentStatus(totalPaid);
         await _billRepository.SaveChangesAsync(cancellationToken);
 
