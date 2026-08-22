@@ -24,6 +24,14 @@ public class CreateBillItemCommandHandler : IRequestHandler<CreateBillItemComman
         if (bill is null)
             throw new NotFoundException($"Bill with Id {request.BillId} was not found.");
 
+        var existingItems = await _billItemRepository.GetByBillIdAsync(request.BillId, cancellationToken);
+        var newTotal = existingItems.Sum(x => x.TotalAmount) + (request.Quantity * request.UnitPrice);
+        var totalPaid = bill.Payments.Where(x => !x.IsDeleted).Sum(x => x.Amount);
+
+        if (newTotal < totalPaid)
+            throw new ConflictException(
+                $"Bill total cannot be less than the amount already paid. Amount paid: {totalPaid:0.00}.");
+
         var item = new BillItem(
             request.BillId,
             request.Description,
@@ -33,29 +41,10 @@ public class CreateBillItemCommandHandler : IRequestHandler<CreateBillItemComman
         await _billItemRepository.AddAsync(item, cancellationToken);
         await _billItemRepository.SaveChangesAsync(cancellationToken);
 
-        await RecalculateBillTotal(request.BillId, cancellationToken);
-
-        return item.Id;
-    }
-
-    private async Task RecalculateBillTotal(int billId, CancellationToken cancellationToken)
-    {
-        var bill = await _billRepository.GetByIdAsync(billId, cancellationToken)
-            ?? throw new NotFoundException($"Bill with Id {billId} was not found.");
-
-        var items = await _billItemRepository.GetByBillIdAsync(billId, cancellationToken);
-        var total = items.Sum(x => x.TotalAmount);
-        var totalPaid = bill.Payments.Where(x => !x.IsDeleted).Sum(x => x.Amount);
-
-        if (total <= 0)
-            return;
-
-        if (total < totalPaid)
-            throw new ConflictException(
-                $"Bill total cannot be less than the amount already paid. Amount paid: {totalPaid:0.00}.");
-
-        bill.Update(total);
+        bill.Update(newTotal);
         bill.UpdatePaymentStatus(totalPaid);
         await _billRepository.SaveChangesAsync(cancellationToken);
+
+        return item.Id;
     }
 }
