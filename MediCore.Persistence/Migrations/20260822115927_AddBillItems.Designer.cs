@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MediCore.Persistence.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260822121317_AddBillItems")]
+    [Migration("20260822115927_AddBillItems")]
     partial class AddBillItems
     {
         /// <inheritdoc />
