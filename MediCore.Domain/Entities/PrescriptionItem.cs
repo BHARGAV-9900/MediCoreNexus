@@ -1,4 +1,4 @@
-﻿using MediCore.Domain.Common;
+using MediCore.Domain.Common;
 
 namespace MediCore.Domain.Entities;
 
@@ -18,7 +18,6 @@ public class PrescriptionItem : BaseAuditableEntity
     {
         SetPrescription(prescriptionId);
         SetMedicine(medicineId);
-
         SetDosage(dosage);
         SetFrequency(frequency);
         SetDuration(durationInDays);
@@ -40,7 +39,6 @@ public class PrescriptionItem : BaseAuditableEntity
     public Prescription? Prescription { get; private set; }
 
     public Medicine? Medicine { get; private set; }
-    
 
     private void SetPrescription(int prescriptionId)
     {
@@ -57,6 +55,7 @@ public class PrescriptionItem : BaseAuditableEntity
 
         MedicineId = medicineId;
     }
+
     private void SetDosage(string dosage)
     {
         if (string.IsNullOrWhiteSpace(dosage))
@@ -64,6 +63,7 @@ public class PrescriptionItem : BaseAuditableEntity
 
         Dosage = dosage.Trim();
     }
+
     private void SetFrequency(string frequency)
     {
         if (string.IsNullOrWhiteSpace(frequency))
@@ -71,6 +71,7 @@ public class PrescriptionItem : BaseAuditableEntity
 
         Frequency = frequency.Trim();
     }
+
     private void SetDuration(int durationInDays)
     {
         if (durationInDays <= 0)
@@ -78,6 +79,7 @@ public class PrescriptionItem : BaseAuditableEntity
 
         DurationInDays = durationInDays;
     }
+
     private void SetQuantity(int quantity)
     {
         if (quantity <= 0)
@@ -85,12 +87,17 @@ public class PrescriptionItem : BaseAuditableEntity
 
         Quantity = quantity;
     }
+
     public void Update(
+        int prescriptionId,
+        int medicineId,
         string dosage,
         string frequency,
         int durationInDays,
         int quantity)
     {
+        SetPrescription(prescriptionId);
+        SetMedicine(medicineId);
         SetDosage(dosage);
         SetFrequency(frequency);
         SetDuration(durationInDays);
@@ -98,6 +105,7 @@ public class PrescriptionItem : BaseAuditableEntity
 
         UpdatedAt = DateTime.UtcNow;
     }
+
     public void Delete()
     {
         IsDeleted = true;
