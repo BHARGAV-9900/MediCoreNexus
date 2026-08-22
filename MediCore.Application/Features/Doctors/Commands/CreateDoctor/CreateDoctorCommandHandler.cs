@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using MediCore.Application.Exceptions;
 using MediCore.Application.Interfaces.Repositories;
 using MediCore.Domain.Entities;
@@ -23,8 +23,6 @@ public class CreateDoctorCommandHandler
         CreateDoctorCommand request,
         CancellationToken cancellationToken)
     {
-        // Verify Department Exists
-        // Verify Department Exists
         var department = await _departmentRepository.GetByIdAsync(
             request.DepartmentId,
             cancellationToken);
@@ -35,21 +33,30 @@ public class CreateDoctorCommandHandler
                 $"Department with Id {request.DepartmentId} was not found.");
         }
 
-        // Verify Email is Unique
-        // Verify Email is Unique
+        var normalizedEmail = request.Email.Trim().ToLower();
+        var normalizedPhoneNumber = request.PhoneNumber.Trim();
+
         if (await _doctorRepository.ExistsByEmailAsync(
-                request.Email,
+                normalizedEmail,
                 cancellationToken))
         {
             throw new ConflictException(
                 "A doctor with this email already exists.");
         }
 
+        if (await _doctorRepository.ExistsByPhoneNumberAsync(
+                normalizedPhoneNumber,
+                cancellationToken))
+        {
+            throw new ConflictException(
+                "A doctor with this phone number already exists.");
+        }
+
         var doctor = new Doctor(
             request.FirstName,
             request.LastName,
-            request.Email,
-            request.PhoneNumber,
+            normalizedEmail,
+            normalizedPhoneNumber,
             request.Specialization,
             request.ExperienceYears,
             request.ConsultationFee,
