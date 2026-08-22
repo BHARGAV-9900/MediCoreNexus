@@ -24,6 +24,15 @@ public interface IDoctorRepository
         int doctorId,
         CancellationToken cancellationToken);
 
+    Task<bool> ExistsByPhoneNumberAsync(
+        string phoneNumber,
+        CancellationToken cancellationToken);
+
+    Task<bool> ExistsByPhoneNumberExceptIdAsync(
+        string phoneNumber,
+        int doctorId,
+        CancellationToken cancellationToken);
+
     Task SaveChangesAsync(
         CancellationToken cancellationToken);
 }
