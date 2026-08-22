@@ -36,17 +36,32 @@ public class CreateDoctorCommandHandler
         var normalizedEmail = request.Email.Trim().ToLower();
         var normalizedPhoneNumber = request.PhoneNumber.Trim();
 
-        if (await _doctorRepository.ExistsByEmailAsync(
-                normalizedEmail,
-                cancellationToken))
+        // Check both duplicate conditions before throwing so the user
+        // receives the most accurate message when both values already exist.
+        var emailExists = await _doctorRepository.ExistsByEmailAsync(
+            normalizedEmail,
+            cancellationToken);
+
+        var phoneExists = await _doctorRepository.ExistsByPhoneNumberAsync(
+            normalizedPhoneNumber,
+            cancellationToken);
+
+        // Both email and phone already exist.
+        if (emailExists && phoneExists)
+        {
+            throw new ConflictException(
+                "A doctor with this email and phone number already exists.");
+        }
+
+        // Only email already exists.
+        if (emailExists)
         {
             throw new ConflictException(
                 "A doctor with this email already exists.");
         }
 
-        if (await _doctorRepository.ExistsByPhoneNumberAsync(
-                normalizedPhoneNumber,
-                cancellationToken))
+        // Only phone number already exists.
+        if (phoneExists)
         {
             throw new ConflictException(
                 "A doctor with this phone number already exists.");
