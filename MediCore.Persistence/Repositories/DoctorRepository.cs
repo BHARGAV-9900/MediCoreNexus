@@ -45,9 +45,11 @@ public class DoctorRepository : IDoctorRepository
         string email,
         CancellationToken cancellationToken)
     {
+        var normalizedEmail = email.Trim().ToLower();
+
         return await _context.Doctors
             .AnyAsync(
-                d => d.Email == email && !d.IsDeleted,
+                d => d.Email.ToLower() == normalizedEmail && !d.IsDeleted,
                 cancellationToken);
     }
 
@@ -56,9 +58,38 @@ public class DoctorRepository : IDoctorRepository
         int doctorId,
         CancellationToken cancellationToken)
     {
+        var normalizedEmail = email.Trim().ToLower();
+
         return await _context.Doctors
             .AnyAsync(
-                d => d.Email == email
+                d => d.Email.ToLower() == normalizedEmail
+                    && d.Id != doctorId
+                    && !d.IsDeleted,
+                cancellationToken);
+    }
+
+    public async Task<bool> ExistsByPhoneNumberAsync(
+        string phoneNumber,
+        CancellationToken cancellationToken)
+    {
+        var normalizedPhoneNumber = phoneNumber.Trim();
+
+        return await _context.Doctors
+            .AnyAsync(
+                d => d.PhoneNumber == normalizedPhoneNumber && !d.IsDeleted,
+                cancellationToken);
+    }
+
+    public async Task<bool> ExistsByPhoneNumberExceptIdAsync(
+        string phoneNumber,
+        int doctorId,
+        CancellationToken cancellationToken)
+    {
+        var normalizedPhoneNumber = phoneNumber.Trim();
+
+        return await _context.Doctors
+            .AnyAsync(
+                d => d.PhoneNumber == normalizedPhoneNumber
                     && d.Id != doctorId
                     && !d.IsDeleted,
                 cancellationToken);
