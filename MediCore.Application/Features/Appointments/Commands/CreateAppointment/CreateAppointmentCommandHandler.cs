@@ -116,7 +116,7 @@ public class CreateAppointmentCommandHandler
                 UserRole.Receptionist
             },
             "New Appointment Scheduled",
-            $"Appointment scheduled for {patient.FullName} with Dr. {doctor.FirstName} {doctor.LastName} on {request.AppointmentDate:dd-MMM-yyyy hh:mm tt} UTC.",
+            $"Appointment scheduled for {patient.FirstName} {patient.LastName} with Dr. {doctor.FirstName} {doctor.LastName} on {request.AppointmentDate:dd-MMM-yyyy hh:mm tt} UTC.",
             "Appointment",
             cancellationToken);
 
