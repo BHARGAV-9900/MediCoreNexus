@@ -1,7 +1,9 @@
-﻿using MediatR;
+using MediatR;
 using MediCore.Application.Exceptions;
 using MediCore.Application.Interfaces.Repositories;
+using MediCore.Application.Interfaces.Services;
 using MediCore.Domain.Entities;
+using MediCore.Domain.Enums;
 
 namespace MediCore.Application.Features.Appointments.Commands.CreateAppointment;
 
@@ -11,15 +13,18 @@ public class CreateAppointmentCommandHandler
     private readonly IAppointmentRepository _appointmentRepository;
     private readonly IPatientRepository _patientRepository;
     private readonly IDoctorRepository _doctorRepository;
+    private readonly INotificationService _notificationService;
 
     public CreateAppointmentCommandHandler(
         IAppointmentRepository appointmentRepository,
         IPatientRepository patientRepository,
-        IDoctorRepository doctorRepository)
+        IDoctorRepository doctorRepository,
+        INotificationService notificationService)
     {
         _appointmentRepository = appointmentRepository;
         _patientRepository = patientRepository;
         _doctorRepository = doctorRepository;
+        _notificationService = notificationService;
     }
 
     public async Task<int> Handle(
@@ -99,6 +104,20 @@ public class CreateAppointmentCommandHandler
             cancellationToken);
 
         await _appointmentRepository.SaveChangesAsync(
+            cancellationToken);
+
+        // Notify administrative/front-desk users about the new appointment.
+        // Notifications are stored per user, so each recipient sees the
+        // notification only in their own notification inbox.
+        await _notificationService.NotifyRolesAsync(
+            new[]
+            {
+                UserRole.Administrator,
+                UserRole.Receptionist
+            },
+            "New Appointment Scheduled",
+            $"Appointment scheduled for {patient.FullName} with Dr. {doctor.FirstName} {doctor.LastName} on {request.AppointmentDate:dd-MMM-yyyy hh:mm tt} UTC.",
+            "Appointment",
             cancellationToken);
 
         return appointment.Id;
