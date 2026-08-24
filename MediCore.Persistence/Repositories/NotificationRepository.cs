@@ -1,4 +1,4 @@
-﻿using MediCore.Application.Interfaces.Repositories;
+using MediCore.Application.Interfaces.Repositories;
 using MediCore.Domain.Entities;
 using MediCore.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
@@ -27,28 +27,37 @@ public class NotificationRepository
 
     public async Task<Notification?> GetByIdAsync(
         int id,
+        int userId,
         CancellationToken cancellationToken)
     {
         return await _context.Notifications
             .FirstOrDefaultAsync(
-                x => x.Id == id && !x.IsDeleted,
+                x =>
+                    x.Id == id &&
+                    x.UserId == userId &&
+                    !x.IsDeleted,
                 cancellationToken);
     }
 
     public async Task<IEnumerable<Notification>> GetAllAsync(
+        int userId,
         CancellationToken cancellationToken)
     {
         return await _context.Notifications
-            .Where(x => !x.IsDeleted)
+            .Where(x =>
+                x.UserId == userId &&
+                !x.IsDeleted)
             .OrderByDescending(x => x.CreatedAt)
             .ToListAsync(cancellationToken);
     }
 
     public async Task<IEnumerable<Notification>> GetUnreadAsync(
+        int userId,
         CancellationToken cancellationToken)
     {
         return await _context.Notifications
             .Where(x =>
+                x.UserId == userId &&
                 !x.IsDeleted &&
                 !x.IsRead)
             .OrderByDescending(x => x.CreatedAt)
