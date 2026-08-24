@@ -28,6 +28,7 @@ public static class InfrastructureServiceRegistration
         services.AddScoped<IPasswordHasherService, PasswordHasherService>();
         services.AddScoped<IJwtTokenService, JwtTokenService>();
         services.AddScoped<IRefreshTokenService, RefreshTokenService>();
+        services.AddScoped<INotificationService, NotificationService>();
 
         services.AddHttpContextAccessor();
 
@@ -74,12 +75,6 @@ public static class InfrastructureServiceRegistration
         {
             OnTokenValidated = async context =>
             {
-                // -------------------------------------------------
-                // JWT is valid.
-                // Now verify that the user is STILL active
-                // in the database.
-                // -------------------------------------------------
-
                 var userIdClaim =
                     context.Principal?
                         .FindFirst(ClaimTypes.NameIdentifier)?
@@ -91,59 +86,36 @@ public static class InfrastructureServiceRegistration
                     return;
                 }
 
-                // Get IUserRepository from DI
                 var userRepository =
                     context.HttpContext.RequestServices
                         .GetRequiredService<IUserRepository>();
 
-                // Read CURRENT database state
                 var user =
                     await userRepository.GetByIdAsync(
                         userId,
                         context.HttpContext.RequestAborted);
 
-                // -------------------------------------------------
-                // User does not exist or has been deleted
-                // -------------------------------------------------
-
                 if (user is null || user.IsDeleted)
                 {
                     context.Fail(
                         "User account is no longer available.");
-
                     return;
                 }
-
-                // -------------------------------------------------
-                // User has been deactivated AFTER JWT was issued
-                // -------------------------------------------------
 
                 if (!user.IsActive)
                 {
                     context.Fail(
                         "User account is inactive.");
-
                     return;
                 }
-
-                // -------------------------------------------------
-                // User is active → authentication succeeds
-                // -------------------------------------------------
             },
 
             OnAuthenticationFailed = context =>
             {
-                Console.WriteLine(
-                    "==================================");
-
-                Console.WriteLine(
-                    "JWT AUTHENTICATION FAILED");
-
-                Console.WriteLine(
-                    context.Exception.Message);
-
-                Console.WriteLine(
-                    "==================================");
+                Console.WriteLine("==================================");
+                Console.WriteLine("JWT AUTHENTICATION FAILED");
+                Console.WriteLine(context.Exception.Message);
+                Console.WriteLine("==================================");
 
                 return Task.CompletedTask;
             }
@@ -157,154 +129,55 @@ public static class InfrastructureServiceRegistration
 
         services.AddAuthorization(options =>
         {
-            options.AddPolicy(
-                "AdminOnly",
-                policy =>
-                    policy.RequireRole("Admin"));
+            options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
 
+            options.AddPolicy("PatientManagement", policy => policy.RequireRole(
+                "Admin", "Doctor", "Receptionist"));
 
-            options.AddPolicy(
-                "PatientManagement",
-                policy =>
-                    policy.RequireRole(
-                        "Admin",
-                        "Doctor",
-                        "Receptionist"));
+            options.AddPolicy("DepartmentView", policy => policy.RequireRole(
+                "Admin", "Doctor", "Receptionist"));
 
+            options.AddPolicy("DepartmentManagement", policy => policy.RequireRole(
+                "Admin", "Receptionist"));
 
-            options.AddPolicy(
-                "DepartmentView",
-                policy =>
-                    policy.RequireRole(
-                        "Admin",
-                        "Doctor",
-                        "Receptionist"));
+            options.AddPolicy("DoctorView", policy => policy.RequireRole(
+                "Admin", "Doctor", "Receptionist"));
 
+            options.AddPolicy("DoctorManagement", policy => policy.RequireRole("Admin"));
 
-            options.AddPolicy(
-                "DepartmentManagement",
-                policy =>
-                    policy.RequireRole(
-                        "Admin",
-                        "Receptionist"));
+            options.AddPolicy("AppointmentManagement", policy => policy.RequireRole(
+                "Admin", "Doctor", "Receptionist"));
 
+            options.AddPolicy("MedicalRecordManagement", policy => policy.RequireRole(
+                "Admin", "Doctor"));
 
-            options.AddPolicy(
-                "DoctorView",
-                policy =>
-                    policy.RequireRole(
-                        "Admin",
-                        "Doctor",
-                        "Receptionist"));
+            options.AddPolicy("LaboratoryManagement", policy => policy.RequireRole(
+                "Admin", "Doctor", "Lab Technician"));
 
+            options.AddPolicy("PharmacyManagement", policy => policy.RequireRole(
+                "Admin", "Pharmacist"));
 
-            options.AddPolicy(
-                "DoctorManagement",
-                policy =>
-                    policy.RequireRole("Admin"));
+            options.AddPolicy("PrescriptionManagement", policy => policy.RequireRole(
+                "Admin", "Doctor", "Pharmacist"));
 
+            options.AddPolicy("InventoryManagement", policy => policy.RequireRole(
+                "Admin", "Pharmacist"));
 
-            options.AddPolicy(
-                "AppointmentManagement",
-                policy =>
-                    policy.RequireRole(
-                        "Admin",
-                        "Doctor",
-                        "Receptionist"));
+            options.AddPolicy("BillingManagement", policy => policy.RequireRole(
+                "Admin", "Accountant", "Receptionist"));
 
+            options.AddPolicy("PaymentManagement", policy => policy.RequireRole(
+                "Admin", "Accountant", "Receptionist"));
 
-            options.AddPolicy(
-                "MedicalRecordManagement",
-                policy =>
-                    policy.RequireRole(
-                        "Admin",
-                        "Doctor"));
+            options.AddPolicy("NotificationManagement", policy => policy.RequireRole(
+                "Admin", "Doctor", "Receptionist", "Pharmacist", "Lab Technician", "Accountant"));
 
+            options.AddPolicy("ReportsManagement", policy => policy.RequireRole(
+                "Admin", "Accountant"));
 
-            options.AddPolicy(
-                "LaboratoryManagement",
-                policy =>
-                    policy.RequireRole(
-                        "Admin",
-                        "Doctor",
-                        "Lab Technician"));
-
-
-            options.AddPolicy(
-                "PharmacyManagement",
-                policy =>
-                    policy.RequireRole(
-                        "Admin",
-                        "Pharmacist"));
-
-
-            options.AddPolicy(
-                "PrescriptionManagement",
-                policy =>
-                    policy.RequireRole(
-                        "Admin",
-                        "Doctor",
-                        "Pharmacist"));
-
-
-            options.AddPolicy(
-                "InventoryManagement",
-                policy =>
-                    policy.RequireRole(
-                        "Admin",
-                        "Pharmacist"));
-
-
-            options.AddPolicy(
-                "BillingManagement",
-                policy =>
-                    policy.RequireRole(
-                        "Admin",
-                        "Accountant",
-                        "Receptionist"));
-
-
-            options.AddPolicy(
-                "PaymentManagement",
-                policy =>
-                    policy.RequireRole(
-                        "Admin",
-                        "Accountant",
-                        "Receptionist"));
-
-
-            options.AddPolicy(
-                "NotificationManagement",
-                policy =>
-                    policy.RequireRole(
-                        "Admin",
-                        "Doctor",
-                        "Receptionist",
-                        "Pharmacist",
-                        "Lab Technician",
-                        "Accountant"));
-
-
-            options.AddPolicy(
-                "ReportsManagement",
-                policy =>
-                    policy.RequireRole(
-                        "Admin",
-                        "Accountant"));
-
-
-            options.AddPolicy(
-                "DashboardAccess",
-                policy =>
-                    policy.RequireRole(
-                        "Admin",
-                        "Doctor",
-                        "Receptionist",
-                        "Pharmacist",
-                        "Lab Technician",
-                        "Accountant"));
+            options.AddPolicy("DashboardAccess", policy => policy.RequireRole(
+                "Admin", "Doctor", "Receptionist", "Pharmacist", "Lab Technician", "Accountant"));
         });
-
 
         return services;
     }
