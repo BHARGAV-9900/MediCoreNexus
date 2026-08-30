@@ -1,6 +1,8 @@
 ﻿using MediatR;
 using MediCore.Application.Exceptions;
 using MediCore.Application.Interfaces.Repositories;
+using MediCore.Application.Interfaces.Services;
+using MediCore.Domain.Enums;
 
 namespace MediCore.Application.Features.Inventory.Commands.UpdateInventory;
 
@@ -8,11 +10,14 @@ public class UpdateInventoryCommandHandler
     : IRequestHandler<UpdateInventoryCommand, bool>
 {
     private readonly IInventoryRepository _inventoryRepository;
+    private readonly INotificationService _notificationService;
 
     public UpdateInventoryCommandHandler(
-        IInventoryRepository inventoryRepository)
+        IInventoryRepository inventoryRepository,
+        INotificationService notificationService)
     {
         _inventoryRepository = inventoryRepository;
+        _notificationService = notificationService;
     }
 
     public async Task<bool> Handle(
@@ -29,6 +34,8 @@ public class UpdateInventoryCommandHandler
                 "Inventory record not found.");
         }
 
+        var wasLowStock = inventory.IsLowStock;
+
         inventory.UpdateStock(request.QuantityInStock);
 
         inventory.Update(
@@ -40,6 +47,23 @@ public class UpdateInventoryCommandHandler
 
         await _inventoryRepository.SaveChangesAsync(
             cancellationToken);
+
+        if (!wasLowStock && inventory.IsLowStock)
+        {
+            var medicineName = inventory.Medicine?.Name
+                ?? $"Medicine #{inventory.MedicineId}";
+
+            await _notificationService.NotifyRolesAsync(
+                new[]
+                {
+                    UserRole.Administrator,
+                    UserRole.Pharmacist
+                },
+                "Low Stock Alert",
+                $"Low stock alert: {medicineName} (Batch {inventory.BatchNumber}) has {inventory.QuantityInStock} units remaining, which is at or below the minimum stock level of {inventory.MinimumStockLevel}.",
+                "Inventory",
+                cancellationToken);
+        }
 
         return true;
     }
