@@ -8,6 +8,13 @@ namespace MediCore.Persistence.Context;
 
 public class ApplicationDbContext : DbContext
 {
+    private static readonly HashSet<string> AuditExcludedEntities =
+        new(StringComparer.OrdinalIgnoreCase)
+        {
+            nameof(Notification),
+            nameof(RefreshToken)
+        };
+
     private static readonly HashSet<string> AuditExcludedProperties =
         new(StringComparer.OrdinalIgnoreCase)
         {
@@ -43,10 +50,12 @@ public class ApplicationDbContext : DbContext
 
         var auditableEntries = ChangeTracker
             .Entries<BaseAuditableEntity>()
-            .Where(entry => entry.State is
-                EntityState.Added or
-                EntityState.Modified or
-                EntityState.Deleted)
+            .Where(entry =>
+                !AuditExcludedEntities.Contains(entry.Metadata.ClrType.Name) &&
+                entry.State is
+                    EntityState.Added or
+                    EntityState.Modified or
+                    EntityState.Deleted)
             .ToList();
 
         foreach (var entry in auditableEntries)
