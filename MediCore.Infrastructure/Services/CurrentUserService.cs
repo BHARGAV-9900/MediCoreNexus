@@ -1,4 +1,4 @@
-﻿using System.Security.Claims;
+using System.Security.Claims;
 using MediCore.Application.Interfaces.Services;
 using Microsoft.AspNetCore.Http;
 
@@ -13,11 +13,13 @@ public class CurrentUserService : ICurrentUserService
         _httpContextAccessor = httpContextAccessor;
     }
 
+    private HttpContext? HttpContext => _httpContextAccessor.HttpContext;
+
     public int? UserId
     {
         get
         {
-            var userId = _httpContextAccessor.HttpContext?
+            var userId = HttpContext?
                 .User?
                 .FindFirst(ClaimTypes.NameIdentifier)?
                 .Value;
@@ -29,19 +31,28 @@ public class CurrentUserService : ICurrentUserService
     }
 
     public string? Email =>
-        _httpContextAccessor.HttpContext?
+        HttpContext?
             .User?
             .FindFirst(ClaimTypes.Email)?
             .Value;
 
     public string? Role =>
-        _httpContextAccessor.HttpContext?
+        HttpContext?
             .User?
             .FindFirst(ClaimTypes.Role)?
             .Value;
 
+    public string? IpAddress =>
+        HttpContext?.Connection.RemoteIpAddress?.ToString();
+
+    public string? RequestPath =>
+        HttpContext?.Request.Path.Value;
+
+    public string? RequestId =>
+        HttpContext?.TraceIdentifier;
+
     public bool IsAuthenticated =>
-        _httpContextAccessor.HttpContext?
+        HttpContext?
             .User?
             .Identity?
             .IsAuthenticated ?? false;
