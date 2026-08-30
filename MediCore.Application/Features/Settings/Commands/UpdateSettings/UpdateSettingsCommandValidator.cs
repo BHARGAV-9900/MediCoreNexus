@@ -10,23 +10,42 @@ public class UpdateSettingsCommandValidator
         "INR",
         "USD",
         "EUR",
-        "GBP"
+        "GBP",
+        "AED",
+        "SAR",
+        "CAD",
+        "AUD",
+        "JPY",
+        "CNY",
+        "CHF",
+        "SGD"
     };
 
     private static readonly string[] SupportedDateFormats =
     {
-        "dd-MMM-yyyy",
         "dd/MM/yyyy",
-        "MM/dd/yyyy",
-        "yyyy-MM-dd"
+        "dd-MM-yyyy",
+        "yyyy-MM-dd",
+        "yyyy/MM/dd",
+        "MM/dd/yyyy"
     };
 
     private static readonly string[] SupportedTimeZones =
     {
         "Asia/Kolkata",
+        "Asia/Dubai",
+        "Asia/Riyadh",
+        "Asia/Singapore",
+        "Asia/Tokyo",
+        "Asia/Shanghai",
         "UTC",
+        "Europe/London",
+        "Europe/Paris",
         "America/New_York",
-        "Europe/London"
+        "America/Chicago",
+        "America/Denver",
+        "America/Los_Angeles",
+        "Australia/Sydney"
     };
 
     public UpdateSettingsCommandValidator()
