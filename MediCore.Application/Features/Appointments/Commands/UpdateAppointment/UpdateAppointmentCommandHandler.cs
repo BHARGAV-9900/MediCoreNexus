@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using MediCore.Application.Exceptions;
 using MediCore.Application.Interfaces.Repositories;
+using MediCore.Application.Interfaces.Services;
 
 namespace MediCore.Application.Features.Appointments.Commands.UpdateAppointment;
 
@@ -8,11 +9,14 @@ public class UpdateAppointmentCommandHandler
     : IRequestHandler<UpdateAppointmentCommand>
 {
     private readonly IAppointmentRepository _appointmentRepository;
+    private readonly INotificationService _notificationService;
 
     public UpdateAppointmentCommandHandler(
-        IAppointmentRepository appointmentRepository)
+        IAppointmentRepository appointmentRepository,
+        INotificationService notificationService)
     {
         _appointmentRepository = appointmentRepository;
+        _notificationService = notificationService;
     }
 
     public async Task Handle(
@@ -27,6 +31,10 @@ public class UpdateAppointmentCommandHandler
         if (appointment is null)
             throw new NotFoundException(
                 $"Appointment with Id {request.Id} was not found.");
+
+        var oldAppointmentDate = appointment.AppointmentDate;
+        var oldReason = appointment.Reason;
+        var oldNotes = appointment.Notes;
 
         // Only validate date/time when appointment time changes
         if (appointment.AppointmentDate != request.AppointmentDate)
@@ -69,6 +77,39 @@ public class UpdateAppointmentCommandHandler
             request.Notes);
 
         await _appointmentRepository.SaveChangesAsync(
+            cancellationToken);
+
+        var patientName = appointment.Patient is not null
+            ? $"{appointment.Patient.FirstName} {appointment.Patient.LastName}"
+            : $"Patient #{appointment.PatientId}";
+
+        var doctorName = appointment.Doctor is not null
+            ? $"Dr. {appointment.Doctor.FirstName} {appointment.Doctor.LastName}"
+            : $"Doctor #{appointment.DoctorId}";
+
+        var changes = new List<string>();
+
+        if (oldAppointmentDate != appointment.AppointmentDate)
+        {
+            changes.Add(
+                $"date/time changed from {oldAppointmentDate:dd-MMM-yyyy hh:mm tt} UTC to {appointment.AppointmentDate:dd-MMM-yyyy hh:mm tt} UTC");
+        }
+
+        if (!string.Equals(oldReason, appointment.Reason, StringComparison.Ordinal))
+            changes.Add("reason updated");
+
+        if (!string.Equals(oldNotes, appointment.Notes, StringComparison.Ordinal))
+            changes.Add("notes updated");
+
+        await _notificationService.NotifyRolesAsync(
+            new[]
+            {
+                MediCore.Domain.Enums.UserRole.Administrator,
+                MediCore.Domain.Enums.UserRole.Receptionist
+            },
+            "Appointment Updated",
+            $"Appointment for {patientName} with {doctorName} was updated. {string.Join("; ", changes)}.",
+            "Appointment",
             cancellationToken);
     }
 }
