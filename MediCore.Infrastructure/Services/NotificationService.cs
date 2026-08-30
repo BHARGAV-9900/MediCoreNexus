@@ -9,13 +9,16 @@ public class NotificationService : INotificationService
 {
     private readonly INotificationRepository _notificationRepository;
     private readonly IUserRepository _userRepository;
+    private readonly ISystemSettingsRepository _systemSettingsRepository;
 
     public NotificationService(
         INotificationRepository notificationRepository,
-        IUserRepository userRepository)
+        IUserRepository userRepository,
+        ISystemSettingsRepository systemSettingsRepository)
     {
         _notificationRepository = notificationRepository;
         _userRepository = userRepository;
+        _systemSettingsRepository = systemSettingsRepository;
     }
 
     public async Task NotifyUserAsync(
@@ -25,6 +28,9 @@ public class NotificationService : INotificationService
         string type,
         CancellationToken cancellationToken)
     {
+        if (!await IsNotificationEnabledAsync(type, cancellationToken))
+            return;
+
         var user = await _userRepository.GetByIdAsync(userId, cancellationToken);
 
         if (user is null || !user.IsActive || user.IsDeleted)
@@ -43,6 +49,9 @@ public class NotificationService : INotificationService
         string type,
         CancellationToken cancellationToken)
     {
+        if (!await IsNotificationEnabledAsync(type, cancellationToken))
+            return;
+
         var roleIds = roles.Select(role => (int)role).Distinct().ToHashSet();
 
         if (roleIds.Count == 0)
@@ -65,5 +74,30 @@ public class NotificationService : INotificationService
         }
 
         await _notificationRepository.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task<bool> IsNotificationEnabledAsync(
+        string type,
+        CancellationToken cancellationToken)
+    {
+        var settings = await _systemSettingsRepository.GetAsync(cancellationToken);
+
+        // Preserve the existing behavior if system settings have not yet
+        // been initialized. Once settings exist, they control notification
+        // generation centrally in the backend.
+        if (settings is null)
+            return true;
+
+        // Master switch: when disabled, no normal notification is created.
+        if (!settings.EnableNotifications)
+            return false;
+
+        return type.Trim().ToLowerInvariant() switch
+        {
+            "appointment" => settings.EnableAppointmentNotifications,
+            "billing" => settings.EnableBillingNotifications,
+            "laboratory" => settings.EnableLaboratoryNotifications,
+            _ => true
+        };
     }
 }
