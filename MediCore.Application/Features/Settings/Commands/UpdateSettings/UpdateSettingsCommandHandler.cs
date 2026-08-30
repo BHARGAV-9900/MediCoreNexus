@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using MediCore.Application.Interfaces.Repositories;
 using MediCore.Domain.Entities;
 
@@ -13,8 +13,7 @@ public class UpdateSettingsCommandHandler
     public UpdateSettingsCommandHandler(
         ISystemSettingsRepository settingsRepository)
     {
-        _settingsRepository =
-            settingsRepository;
+        _settingsRepository = settingsRepository;
     }
 
     public async Task<bool> Handle(
@@ -22,7 +21,7 @@ public class UpdateSettingsCommandHandler
         CancellationToken cancellationToken)
     {
         var settings =
-            await _settingsRepository.GetAsync(
+            await _settingsRepository.GetForUpdateAsync(
                 cancellationToken);
 
         if (settings is null)
