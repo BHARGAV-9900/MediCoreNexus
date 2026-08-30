@@ -94,37 +94,43 @@ public class DashboardRepository : IDashboardRepository
         // -----------------------------
         // BILLS
         // -----------------------------
+        // A bill remains active until it is paid or otherwise voided/deleted.
+        // A partially paid bill is still pending and must remain in the
+        // pending count.
 
-        var totalBills = await _context.Bills
-            .CountAsync(
-                b => !b.IsDeleted,
-                cancellationToken);
+        var activeBills = _context.Bills
+            .Where(b => !b.IsDeleted);
+
+        var totalBills = await activeBills
+            .CountAsync(cancellationToken);
 
         // -----------------------------
         // PAID BILLS
         // -----------------------------
-        // Only active bills with active payments are considered paid.
+        // A bill is paid only when its payment total reaches the bill's
+        // total amount. The Bill domain entity maintains IsPaid based on
+        // the accumulated payments.
 
-        var paidBills = await _context.Payments
-            .Where(p =>
-                !p.IsDeleted &&
-                p.Bill != null &&
-                !p.Bill.IsDeleted)
-            .Select(p => p.BillId)
-            .Distinct()
-            .CountAsync(cancellationToken);
+        var paidBills = await activeBills
+            .CountAsync(
+                b => b.IsPaid,
+                cancellationToken);
 
         // -----------------------------
         // PENDING BILLS
         // -----------------------------
+        // Includes both unpaid and partially paid active bills.
 
-        var pendingBills = totalBills - paidBills;
+        var pendingBills = await activeBills
+            .CountAsync(
+                b => !b.IsPaid,
+                cancellationToken);
 
         // -----------------------------
         // TOTAL REVENUE
         // -----------------------------
         // Revenue is calculated only from active payments belonging
-        // to active bills.
+        // to active bills. Partial payments are included in revenue.
 
         var totalRevenue = await _context.Payments
             .Where(p =>
