@@ -1,7 +1,9 @@
 ﻿using MediatR;
 using MediCore.Application.Exceptions;
 using MediCore.Application.Interfaces.Repositories;
+using MediCore.Application.Interfaces.Services;
 using MediCore.Domain.Entities;
+using MediCore.Domain.Enums;
 
 namespace MediCore.Application.Features.Billing.Commands.CreateBill;
 
@@ -10,13 +12,16 @@ public class CreateBillCommandHandler
 {
     private readonly IBillRepository _billRepository;
     private readonly IAppointmentRepository _appointmentRepository;
+    private readonly INotificationService _notificationService;
 
     public CreateBillCommandHandler(
         IBillRepository billRepository,
-        IAppointmentRepository appointmentRepository)
+        IAppointmentRepository appointmentRepository,
+        INotificationService notificationService)
     {
         _billRepository = billRepository;
         _appointmentRepository = appointmentRepository;
+        _notificationService = notificationService;
     }
 
     public async Task<int> Handle(
@@ -50,6 +55,18 @@ public class CreateBillCommandHandler
             cancellationToken);
 
         await _billRepository.SaveChangesAsync(
+            cancellationToken);
+
+        // Notify Administrator and Receptionist after the bill is successfully created.
+        await _notificationService.NotifyRolesAsync(
+            new[]
+            {
+                UserRole.Administrator,
+                UserRole.Receptionist
+            },
+            "New Bill Created",
+            $"A new bill has been created for Appointment #{request.AppointmentId} with a total amount of {request.TotalAmount:0.00}.",
+            "Billing",
             cancellationToken);
 
         return bill.Id;
