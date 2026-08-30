@@ -1,4 +1,4 @@
-﻿namespace MediCore.Application.Interfaces.Services;
+namespace MediCore.Application.Interfaces.Services;
 
 public interface ICurrentUserService
 {
@@ -7,6 +7,12 @@ public interface ICurrentUserService
     string? Email { get; }
 
     string? Role { get; }
+
+    string? IpAddress { get; }
+
+    string? RequestPath { get; }
+
+    string? RequestId { get; }
 
     bool IsAuthenticated { get; }
 }
