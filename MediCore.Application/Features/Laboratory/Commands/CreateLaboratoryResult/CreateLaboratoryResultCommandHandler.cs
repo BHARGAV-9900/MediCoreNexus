@@ -1,7 +1,9 @@
-﻿using MediatR;
+using MediatR;
 using MediCore.Application.Exceptions;
 using MediCore.Application.Interfaces.Repositories;
+using MediCore.Application.Interfaces.Services;
 using MediCore.Domain.Entities;
+using MediCore.Domain.Enums;
 
 namespace MediCore.Application.Features.Laboratory.Commands.CreateLaboratoryResult;
 
@@ -10,13 +12,16 @@ public class CreateLaboratoryResultCommandHandler
 {
     private readonly ILaboratoryResultRepository _resultRepository;
     private readonly ILaboratoryOrderRepository _orderRepository;
+    private readonly INotificationService _notificationService;
 
     public CreateLaboratoryResultCommandHandler(
         ILaboratoryResultRepository resultRepository,
-        ILaboratoryOrderRepository orderRepository)
+        ILaboratoryOrderRepository orderRepository,
+        INotificationService notificationService)
     {
         _resultRepository = resultRepository;
         _orderRepository = orderRepository;
+        _notificationService = notificationService;
     }
 
     public async Task<int> Handle(
@@ -49,6 +54,25 @@ public class CreateLaboratoryResultCommandHandler
             cancellationToken);
 
         await _resultRepository.SaveChangesAsync(
+            cancellationToken);
+
+        var patientName = order.Appointment?.Patient is not null
+            ? $"{order.Appointment.Patient.FirstName} {order.Appointment.Patient.LastName}"
+            : $"Patient #{order.Appointment?.PatientId}";
+
+        var doctorName = order.Appointment?.Doctor is not null
+            ? $"Dr. {order.Appointment.Doctor.FirstName} {order.Appointment.Doctor.LastName}"
+            : $"Doctor #{order.Appointment?.DoctorId}";
+
+        await _notificationService.NotifyRolesAsync(
+            new[]
+            {
+                UserRole.Administrator,
+                UserRole.Receptionist
+            },
+            "Laboratory Result Available",
+            $"The laboratory result for {patientName} with {doctorName} is now available. Laboratory Order #{request.LaboratoryOrderId}.",
+            "Laboratory",
             cancellationToken);
 
         return laboratoryResult.Id;
