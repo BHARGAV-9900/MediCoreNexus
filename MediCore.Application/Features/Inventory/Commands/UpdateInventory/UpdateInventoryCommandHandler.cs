@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using MediCore.Application.Exceptions;
 using MediCore.Application.Interfaces.Repositories;
 using MediCore.Application.Interfaces.Services;
@@ -32,6 +32,23 @@ public class UpdateInventoryCommandHandler
         {
             throw new NotFoundException(
                 "Inventory record not found.");
+        }
+
+        var inventories = await _inventoryRepository.GetAllAsync(
+            cancellationToken);
+
+        var duplicateExists = inventories.Any(x =>
+            x.Id != request.Id &&
+            x.MedicineId == inventory.MedicineId &&
+            string.Equals(
+                x.BatchNumber.Trim(),
+                request.BatchNumber.Trim(),
+                StringComparison.OrdinalIgnoreCase));
+
+        if (duplicateExists)
+        {
+            throw new ConflictException(
+                "Inventory already exists for this medicine and batch number.");
         }
 
         var wasLowStock = inventory.IsLowStock;
