@@ -29,14 +29,9 @@ public class SystemSettings : BaseAuditableEntity
         DateFormat = dateFormat;
         TimeZone = timeZone;
 
-        DefaultAppointmentDuration =
-            defaultAppointmentDuration;
-
-        LowStockThreshold =
-            lowStockThreshold;
-
-        ExpiryWarningDays =
-            expiryWarningDays;
+        DefaultAppointmentDuration = defaultAppointmentDuration;
+        LowStockThreshold = lowStockThreshold;
+        ExpiryWarningDays = expiryWarningDays;
 
         EnableNotifications = true;
         EnableAppointmentNotifications = true;
@@ -44,68 +39,21 @@ public class SystemSettings : BaseAuditableEntity
         EnableLaboratoryNotifications = true;
     }
 
-    public string HospitalName { get; private set; }
-        = string.Empty;
+    public string HospitalName { get; private set; } = string.Empty;
+    public string HospitalEmail { get; private set; } = string.Empty;
+    public string HospitalPhone { get; private set; } = string.Empty;
+    public string HospitalAddress { get; private set; } = string.Empty;
+    public string Currency { get; private set; } = "INR";
+    public string DateFormat { get; private set; } = "dd/MM/yyyy";
+    public string TimeZone { get; private set; } = "Asia/Kolkata";
 
-    public string HospitalEmail { get; private set; }
-        = string.Empty;
-
-    public string HospitalPhone { get; private set; }
-        = string.Empty;
-
-    public string HospitalAddress { get; private set; }
-        = string.Empty;
-
-    public string Currency { get; private set; }
-        = "INR";
-
-    public string DateFormat { get; private set; }
-        = "dd-MMM-yyyy";
-
-    public string TimeZone { get; private set; }
-        = "Asia/Kolkata";
-
-    public int DefaultAppointmentDuration
-    {
-        get;
-        private set;
-    }
-
-    public int LowStockThreshold
-    {
-        get;
-        private set;
-    }
-
-    public int ExpiryWarningDays
-    {
-        get;
-        private set;
-    }
-
-    public bool EnableNotifications
-    {
-        get;
-        private set;
-    }
-
-    public bool EnableAppointmentNotifications
-    {
-        get;
-        private set;
-    }
-
-    public bool EnableBillingNotifications
-    {
-        get;
-        private set;
-    }
-
-    public bool EnableLaboratoryNotifications
-    {
-        get;
-        private set;
-    }
+    public int DefaultAppointmentDuration { get; private set; }
+    public int LowStockThreshold { get; private set; }
+    public int ExpiryWarningDays { get; private set; }
+    public bool EnableNotifications { get; private set; }
+    public bool EnableAppointmentNotifications { get; private set; }
+    public bool EnableBillingNotifications { get; private set; }
+    public bool EnableLaboratoryNotifications { get; private set; }
 
     public void Update(
         string hospitalName,
@@ -131,65 +79,41 @@ public class SystemSettings : BaseAuditableEntity
         Currency = currency;
         DateFormat = dateFormat;
         TimeZone = timeZone;
-
-        DefaultAppointmentDuration =
-            defaultAppointmentDuration;
-
-        LowStockThreshold =
-            lowStockThreshold;
-
-        ExpiryWarningDays =
-            expiryWarningDays;
-
-        EnableNotifications =
-            enableNotifications;
-
-        EnableAppointmentNotifications =
-            enableAppointmentNotifications;
-
-        EnableBillingNotifications =
-            enableBillingNotifications;
-
-        EnableLaboratoryNotifications =
-            enableLaboratoryNotifications;
-
+        DefaultAppointmentDuration = defaultAppointmentDuration;
+        LowStockThreshold = lowStockThreshold;
+        ExpiryWarningDays = expiryWarningDays;
+        EnableNotifications = enableNotifications;
+        EnableAppointmentNotifications = enableAppointmentNotifications;
+        EnableBillingNotifications = enableBillingNotifications;
+        EnableLaboratoryNotifications = enableLaboratoryNotifications;
         UpdatedAt = DateTime.UtcNow;
     }
 
     private void SetHospitalName(string value)
     {
         if (string.IsNullOrWhiteSpace(value))
-            throw new ArgumentException(
-                "Hospital name is required.");
-
+            throw new ArgumentException("Hospital name is required.");
         HospitalName = value.Trim();
     }
 
     private void SetHospitalEmail(string value)
     {
         if (string.IsNullOrWhiteSpace(value))
-            throw new ArgumentException(
-                "Hospital email is required.");
-
-        HospitalEmail =
-            value.Trim().ToLowerInvariant();
+            throw new ArgumentException("Hospital email is required.");
+        HospitalEmail = value.Trim().ToLowerInvariant();
     }
 
     private void SetHospitalPhone(string value)
     {
         if (string.IsNullOrWhiteSpace(value))
-            throw new ArgumentException(
-                "Hospital phone is required.");
-
+            throw new ArgumentException("Hospital phone is required.");
         HospitalPhone = value.Trim();
     }
 
     private void SetHospitalAddress(string value)
     {
         if (string.IsNullOrWhiteSpace(value))
-            throw new ArgumentException(
-                "Hospital address is required.");
-
+            throw new ArgumentException("Hospital address is required.");
         HospitalAddress = value.Trim();
     }
 }
