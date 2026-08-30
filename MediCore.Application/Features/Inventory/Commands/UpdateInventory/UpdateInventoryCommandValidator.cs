@@ -13,6 +13,9 @@ public class UpdateInventoryCommandValidator
         RuleFor(x => x.BatchNumber)
             .NotEmpty();
 
+        RuleFor(x => x.QuantityInStock)
+            .GreaterThanOrEqualTo(0);
+
         RuleFor(x => x.MinimumStockLevel)
             .GreaterThanOrEqualTo(0);
 
