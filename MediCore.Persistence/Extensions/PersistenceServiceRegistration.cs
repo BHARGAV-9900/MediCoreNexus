@@ -1,4 +1,4 @@
-﻿using MediCore.Application.Interfaces.Repositories;
+using MediCore.Application.Interfaces.Repositories;
 using MediCore.Persistence.Context;
 using MediCore.Persistence.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -39,6 +39,7 @@ public static class PersistenceServiceRegistration
         services.AddScoped<INotificationRepository, NotificationRepository>();
         services.AddScoped<IReportRepository, ReportRepository>();
         services.AddScoped<ISystemSettingsRepository, SystemSettingsRepository>();
+        services.AddScoped<IAuditLogRepository, AuditLogRepository>();
 
         return services;
     }
