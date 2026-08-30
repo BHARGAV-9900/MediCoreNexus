@@ -1,4 +1,4 @@
-﻿using MediCore.Application.Interfaces.Repositories;
+using MediCore.Application.Interfaces.Repositories;
 using MediCore.Domain.Entities;
 using MediCore.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
@@ -21,6 +21,14 @@ public class SystemSettingsRepository
     {
         return await _context.SystemSettings
             .AsNoTracking()
+            .FirstOrDefaultAsync(
+                cancellationToken);
+    }
+
+    public async Task<SystemSettings?> GetForUpdateAsync(
+        CancellationToken cancellationToken)
+    {
+        return await _context.SystemSettings
             .FirstOrDefaultAsync(
                 cancellationToken);
     }
