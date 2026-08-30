@@ -1,4 +1,5 @@
-﻿using MediatR;
+using MediatR;
+using MediCore.Application.Exceptions;
 using MediCore.Application.Interfaces.Repositories;
 using InventoryEntity = MediCore.Domain.Entities.Inventory;
 
@@ -19,6 +20,22 @@ public class CreateInventoryCommandHandler
         CreateInventoryCommand request,
         CancellationToken cancellationToken)
     {
+        var inventories = await _inventoryRepository.GetAllAsync(
+            cancellationToken);
+
+        var duplicateExists = inventories.Any(x =>
+            x.MedicineId == request.MedicineId &&
+            string.Equals(
+                x.BatchNumber.Trim(),
+                request.BatchNumber.Trim(),
+                StringComparison.OrdinalIgnoreCase));
+
+        if (duplicateExists)
+        {
+            throw new ConflictException(
+                "Inventory already exists for this medicine and batch number.");
+        }
+
         var inventory = new InventoryEntity(
             request.MedicineId,
             request.BatchNumber,
