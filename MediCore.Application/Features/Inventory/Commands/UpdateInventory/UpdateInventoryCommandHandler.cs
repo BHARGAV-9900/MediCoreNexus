@@ -29,6 +29,8 @@ public class UpdateInventoryCommandHandler
                 "Inventory record not found.");
         }
 
+        inventory.UpdateStock(request.QuantityInStock);
+
         inventory.Update(
             request.BatchNumber,
             request.MinimumStockLevel,
