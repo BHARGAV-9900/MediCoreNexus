@@ -24,30 +24,40 @@ public class DashboardRepository : IDashboardRepository
         // -----------------------------
         // PATIENTS
         // -----------------------------
+        // Dashboard counts should match the active records shown
+        // in the Patients module. Soft-deleted records are excluded.
 
         var totalPatients = await _context.Patients
-            .CountAsync(cancellationToken);
+            .CountAsync(
+                p => !p.IsDeleted,
+                cancellationToken);
 
         // -----------------------------
         // DOCTORS
         // -----------------------------
 
         var totalDoctors = await _context.Doctors
-            .CountAsync(cancellationToken);
+            .CountAsync(
+                d => !d.IsDeleted,
+                cancellationToken);
 
         // -----------------------------
         // DEPARTMENTS
         // -----------------------------
 
         var totalDepartments = await _context.Departments
-            .CountAsync(cancellationToken);
+            .CountAsync(
+                d => !d.IsDeleted,
+                cancellationToken);
 
         // -----------------------------
         // APPOINTMENTS
         // -----------------------------
 
         var totalAppointments = await _context.Appointments
-            .CountAsync(cancellationToken);
+            .CountAsync(
+                a => !a.IsDeleted,
+                cancellationToken);
 
         // -----------------------------
         // TODAY'S APPOINTMENTS
@@ -55,7 +65,9 @@ public class DashboardRepository : IDashboardRepository
 
         var todayAppointments = await _context.Appointments
             .CountAsync(
-                a => a.AppointmentDate.Date == today,
+                a =>
+                    !a.IsDeleted &&
+                    a.AppointmentDate.Date == today,
                 cancellationToken);
 
         // -----------------------------
@@ -63,7 +75,9 @@ public class DashboardRepository : IDashboardRepository
         // -----------------------------
 
         var totalMedicines = await _context.Medicines
-            .CountAsync(cancellationToken);
+            .CountAsync(
+                m => !m.IsDeleted,
+                cancellationToken);
 
         // -----------------------------
         // LOW STOCK MEDICINES
@@ -82,13 +96,20 @@ public class DashboardRepository : IDashboardRepository
         // -----------------------------
 
         var totalBills = await _context.Bills
-            .CountAsync(cancellationToken);
+            .CountAsync(
+                b => !b.IsDeleted,
+                cancellationToken);
 
         // -----------------------------
         // PAID BILLS
         // -----------------------------
+        // Only active bills with active payments are considered paid.
 
         var paidBills = await _context.Payments
+            .Where(p =>
+                !p.IsDeleted &&
+                p.Bill != null &&
+                !p.Bill.IsDeleted)
             .Select(p => p.BillId)
             .Distinct()
             .CountAsync(cancellationToken);
@@ -102,8 +123,14 @@ public class DashboardRepository : IDashboardRepository
         // -----------------------------
         // TOTAL REVENUE
         // -----------------------------
+        // Revenue is calculated only from active payments belonging
+        // to active bills.
 
         var totalRevenue = await _context.Payments
+            .Where(p =>
+                !p.IsDeleted &&
+                p.Bill != null &&
+                !p.Bill.IsDeleted)
             .SumAsync(
                 p => (decimal?)p.Amount,
                 cancellationToken)
@@ -114,14 +141,18 @@ public class DashboardRepository : IDashboardRepository
         // -----------------------------
 
         var totalLaboratoryOrders = await _context.LaboratoryOrders
-            .CountAsync(cancellationToken);
+            .CountAsync(
+                o => !o.IsDeleted,
+                cancellationToken);
 
         // -----------------------------
         // PRESCRIPTIONS
         // -----------------------------
 
         var totalPrescriptions = await _context.Prescriptions
-            .CountAsync(cancellationToken);
+            .CountAsync(
+                p => !p.IsDeleted,
+                cancellationToken);
 
         // -----------------------------
         // RESULT
