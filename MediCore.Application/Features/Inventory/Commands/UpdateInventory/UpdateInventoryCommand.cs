@@ -8,6 +8,8 @@ public class UpdateInventoryCommand : IRequest<bool>
 
     public string BatchNumber { get; set; } = string.Empty;
 
+    public int QuantityInStock { get; set; }
+
     public int MinimumStockLevel { get; set; }
 
     public DateTime ExpiryDate { get; set; }
