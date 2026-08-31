@@ -1,4 +1,4 @@
-﻿using FluentValidation;
+using FluentValidation;
 using MediCore.Application.Exceptions;
 using MediCore.Shared.Responses;
 using System.Text.Json;
@@ -8,10 +8,14 @@ namespace MediCore.API.Middleware;
 public class GlobalExceptionMiddleware
 {
     private readonly RequestDelegate _next;
+    private readonly ILogger<GlobalExceptionMiddleware> _logger;
 
-    public GlobalExceptionMiddleware(RequestDelegate next)
+    public GlobalExceptionMiddleware(
+        RequestDelegate next,
+        ILogger<GlobalExceptionMiddleware> logger)
     {
         _next = next;
+        _logger = logger;
     }
 
     public async Task InvokeAsync(HttpContext context)
@@ -65,8 +69,15 @@ public class GlobalExceptionMiddleware
             await context.Response.WriteAsync(
                 JsonSerializer.Serialize(response));
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            _logger.LogError(
+                ex,
+                "Unhandled exception. RequestId: {RequestId}, Method: {Method}, Path: {Path}",
+                context.TraceIdentifier,
+                context.Request.Method,
+                context.Request.Path);
+
             context.Response.StatusCode =
                 StatusCodes.Status500InternalServerError;
 
