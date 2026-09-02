@@ -24,7 +24,7 @@ public class PatientDto
 
     public string EmergencyContactPhone { get; set; } = string.Empty;
 
-    public string InsuranceNumber { get; set; } = string.Empty;
+    public string? InsuranceNumber { get; set; }
 
     public bool IsActive { get; set; }
 }
